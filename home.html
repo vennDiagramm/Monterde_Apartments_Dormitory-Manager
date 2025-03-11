@@ -40,11 +40,11 @@
                 </div>
                 
                 <div class="menu-btn-container text-center border-bottom">
-                    <button class="menu-btn w-100">Payment</button>
+                    <button class="menu-btn w-100" id="paymentBtn">Payment</button>
                 </div>
                 
                 <div class="menu-btn-container text-center border-bottom">
-                    <button class="menu-btn w-100">Report</button>
+                    <button class="menu-btn w-100" id="reportBtn">Report</button>
                 </div>
             </div>
             
@@ -170,23 +170,22 @@
                 <!-- Dismiss Tenant -->
                 <div id="dismissTenantFormContainer" class="container p-4 bg-dark text-white rounded shadow mt-3">
                     <h2>Dismiss a Tenant</h2>
-                    <form id="dismissTenantForm">
-                        <table id="tenantInfoTable" class="table table-dark table-striped table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Person ID</th>
-                                    <th>First Name</th>
-                                    <th>Last Name</th>
-                                    <th>Room Number</th>
-                                    <th>Apartment Location</th>
-                                    <th>Room Price</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- Table content will be inserted here -->
-                            </tbody>
-                        </table>
-
+                    <table id="tenantInfoTable" class="table table-dark table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Person ID</th>
+                                <th>First Name</th>
+                                <th>Last Name</th>
+                                <th>Room Number</th>
+                                <th>Apartment Location</th>
+                                <th>Room Price</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Table content will be inserted here -->
+                        </tbody>
+                    </table>
+                    <form id="dismissTenantForm" class="row g-3">
                         <div class="mb-3">
                             <label class="form-label">Person ID:</label>
                             <input type="text" class="form-control">
@@ -198,24 +197,68 @@
                     </form>
                 </div>
 
+                <!--        Room Management     -->
                 <div id="roomsFormContainer" class="container p-4 bg-dark text-white rounded shadow mt-3">
-                        <form id="updateRoomsForm" class="row g-3">
-                            <table id="roomTable" class="table-dark table-striped table-hover">
-                                <thead>
-                                    <tr>
-                                        <th>Room ID</th>
-                                        <th>Floor</th>
-                                        <th>Tenants</th>
-                                        <th>Max Renters</th>
-                                        <th>Price</th>
-                                        <th>Status</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <!-- Table content will be inserted here -->
-                                </tbody>
-                            </table>
-                        </form>
+                    <h2>Manage Rooms</h2>    
+                    <table id="roomTable" class="table-dark table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Room ID</th>
+                                <th>Floor</th>
+                                <th>Tenants</th>
+                                <th>Max Renters</th>
+                                <th>Price</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Table content will be inserted here -->
+                        </tbody>
+                    </table>
+
+                    <form id="updateRoomsForm" class="row g-3">
+                        <!--    First Row:  -->
+                        <div class="col-12">
+                            <label for="roomId" class="form-label">Select Room ID</label>
+                            <select id="roomId" class="form-select" required>
+                                <option value="">Select a Room</option>
+                            </select>
+                        </div>
+                        <div class="col-12">
+                            <label for="roomFloor" class="form-label">Room Floor</label>
+                            <input type="text" id="roomFloor" class="form-control">
+                        </div>
+                        <div class="col-12">
+                            <label for="numTenants" class="form-label">Number of Tenants</label>
+                            <input type="text" id="numTenants" class="form-control">
+                        </div>
+
+                        <!--    Second Row:    -->
+                        <div class="col-12">
+                            <label for="maxRenters" class="form-label">Max Renters</label>
+                            <input type="text" id="maxRenters" class="form-control">
+                        </div>
+                        <div class="col-12">
+                            <label for="roomPrice" class="form-label">Room Price</label>
+                            <input type="date" id="roomPrice" class="form-control">
+                        </div>
+                        
+                        <div class="col-12">
+                            <label for="roomStatus" class="form-label">Room Status</label>
+                            <select id="roomStatus" class="form-select" required>
+                                <option value="1">Vacant</option>
+                                <option value="2">Occupied</option>
+                                <option value="3">Maintenance</option>
+                                <option value="4">Reserve</option>
+                                <option value="5">Unavailable</option>
+                            </select>
+                        </div>
+
+                        <!-- Last Row: Submit Button Centered -->
+                        <div class="col-12 full-width">
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </div>
+                    </form>
                 </div>
             </div>
 

@@ -96,7 +96,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Rooms when click
+    // Dismiss Tenant Form
     const dismissTenentBtn = document.getElementById("dismissTenentBtn");
     const dismissTenantFormContainer = document.getElementById("dismissTenantFormContainer");
 
@@ -107,4 +107,15 @@ document.addEventListener('DOMContentLoaded', function() {
             mainContentArea.appendChild(dismissTenantFormContainer);
         });
     }
+
+    //Room Management
+    const roomsBtn = document.getElementById("roomsBtn");
+    const roomsFormContainer = document.getElementById("roomsFormContainer");
+
+
+    // Payment
+    const paymentBtn = document.getElementById("paymentBtn");
+
+    //Reports
+    const reportBtn = document.getElementById("reportBtn");
 });
