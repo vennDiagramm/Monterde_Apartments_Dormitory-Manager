@@ -298,10 +298,20 @@
                             
                             <div id="moreOptions" class="collapse">
                               <div class="d-flex gap-3 mb-3">
-                                <button type="button" id="addRoom" class="btn btn-primary flex-fill px-4">Add</button>
-                                <button type="button" id="deleteRoom" class="btn btn-danger flex-fill px-4">Demolish</button>
+                                <button type="button" id="addRoom"  class="btn btn-primary flex-fill px-4"
+                                    data-bs-toggle="modal"  data-bs-target="#addRoomModal">
+                                    Add
+                                </button>
+
+                                <button type="button" id="deleteRoom"  class="btn btn-danger flex-fill px-4"
+                                    data-bs-toggle="modal"  data-bs-target="#deleteRoomModal">
+                                    Demolish
+                                </button>
                               </div>
-                              <button type="button" id="viewRooms" class="btn btn-info w-100">View</button>
+                              <button type="button" id="viewRooms"  class="btn btn-info w-100"
+                                data-bs-toggle="modal"  data-bs-target="#viewRoomsModal">
+                                View
+                            </button>
                             </div>
                         </div>
                     </form>
@@ -376,31 +386,40 @@
                     </div>
                     <!-- End of Delete Room Modal -->
                     
-                    <!-- View Rooms Collapsible Section -->
-                    <div class="collapse mt-4" id="viewRoomsCollapse">
-                        <div class="card card-body bg-dark border-secondary">
-                            <h5>All Rooms</h5>
-                            <div class="table-responsive">
-                                <table id="allRoomsTable" class="table table-dark table-striped table-hover">
-                                    <thead>
-                                        <tr>
-                                            <th>Room ID</th>
-                                            <th>Floor</th>
-                                            <th>Number of Renters</th> 
-                                            <th>Max Renters</th>
-                                            <th>Price</th>
-                                            <th>Status</th>
-                                            <th>Apartment Location</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <!-- Room data will be inserted here -->
-                                    </tbody>
-                                </table>
+                    <!-- View Rooms Modal -->
+                    <div class="modal fade" id="viewRoomsModal" tabindex="-1" aria-labelledby="viewRoomsModalLabel" aria-hidden="true">
+                        <div class="modal-dialog modal-lg"> <!-- Larger size for better table visibility -->
+                            <div class="modal-content bg-dark text-white">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="viewRoomsModalLabel">All Rooms</h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+
+                                <div class="modal-body">
+                                    <div class="table-responsive">
+                                        <table id="allRoomsTable" class="table table-dark table-striped table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Room ID</th>
+                                                    <th>Floor</th>
+                                                    <th>Number of Renters</th> 
+                                                    <th>Max Renters</th>
+                                                    <th>Price</th>
+                                                    <th>Status</th>
+                                                    <th>Apartment Location</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <!-- Room data will be inserted here -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <!-- End of View Rooms Collapsible Section -->
+                    <!-- End of View Rooms Modal -->
+
                 </div>
                 <!--        END of Room Management     -->
                 </div>

@@ -129,4 +129,88 @@ document.addEventListener('DOMContentLoaded', function() {
 
     //Reports
     const reportBtn = document.getElementById("reportBtn");
+
+
+    const addRoomForm = document.getElementById('addRoomForm');
+    addRoomForm.addEventListener('submit', addRoom);
 });
+
+
+// Add Room
+async function addRoom(event) {
+    event.preventDefault();
+    // const roomsModal = document.getElementById('addRoomModal');
+    const floor = parseInt(document.getElementById("roomFloorAdd").value, 10);
+    const maxRenters = parseInt(document.getElementById("maxRentersAdd").value, 10);
+    const price = parseFloat(document.getElementById("roomPriceAdd").value);
+    const status = parseInt(document.getElementById("roomStatusAdd").value, 10);
+    let number_of_Renters = 0;
+    
+    // Get the apartment name
+    const apartmentName = getCurrentApartment();
+    
+    // Map apartments to their Apt_Loc_ID
+    const apartmentMap = {
+        "Matina Apartment": 1,
+        "Sesame Apartment": 2,
+        "Nabua Apartment": 3
+    };
+    
+    // Get the ID from the map
+    const apt_loc = apartmentMap[apartmentName];
+    
+    // Validate apartment ID
+    if (!apt_loc) {
+        alert("Invalid apartment location.");
+        return;
+    }
+    
+    // Validate input fields
+    if (isNaN(floor) || floor < 0) {
+        alert("Floor must be a non-negative number.");
+        return;
+    }
+    if (isNaN(maxRenters) || maxRenters < 1) {
+        alert("Max renters must be at least 1.");
+        return;
+    }
+    if (isNaN(price) || price < 0) {
+        alert("Price must be a non-negative number.");
+        return;
+    }
+    if (isNaN(status)) {
+        alert("Status is required.");
+        return;
+    }
+    
+    // Prepare request payload with correct parameter names
+    const newRoom = { 
+        floor, 
+        tenants: number_of_Renters, 
+        max_renters: maxRenters, 
+        status, 
+        price, 
+        apt_loc
+    };
+    
+    try {
+        const response = await fetch("/addRoom", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(newRoom)
+        });
+
+        if (response.ok) {
+            alert("Room added successfully!");
+            closeModal('addRoomModal');
+            event.target.reset();
+        } else {
+            alert("Failed to add room.");
+        }
+        
+        fetchRooms(); // Refresh rooms to update the display
+    } catch (error) {
+        console.error("Error adding room:", error);
+    }
+}
+// End of Add Room Function
