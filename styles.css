@@ -107,10 +107,10 @@ body {
 }
 
 .back-btn {
-    display: block; /* Ensures it behaves like a button */
-    width: 100%; /* Matches the button width */
-    text-align: center;
-    padding: 25px 10px; /* Matches .menu-btn padding */
+    display: block;
+    width: 100%;
+    text-align: left;  /* Aligns content to the left */
+    padding: 25px 10px;
     background-color: #1a1a1a;
     color: #fff;
     text-decoration: none;
@@ -121,18 +121,15 @@ body {
     border: none;
 }
 
-/* Inner wrapper to align icon and text */
 .back-btn-content {
     display: inline-flex;
     align-items: center;
-    justify-content: center;
     gap: 15px; /* Space between icon and text */
-    margin-left: -90px;
+    margin-left: 0; 
 }
 
-/* Icon styling */
 .btn-icon {
-    width: 30px; /* Adjust size if needed */
+    width: 30px;
     height: auto;
 }
 
@@ -287,12 +284,20 @@ body {
 }
 
 .modal {
-    z-index: 1055 !important;
+    pointer-events: auto;
+    z-index: 1050;
+    position: fixed;
+    background-color: rgba(0,0,0,0.4);
 }
 
 .modal-backdrop {
-    z-index: 1050 !important;
+    z-index: 900;
+    pointer-events: none;
+    opacity: 0.5%;
+    background-color: transparent;
 }
+
+
 
 /* Tables */
 .table-dark {

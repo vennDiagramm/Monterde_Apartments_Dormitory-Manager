@@ -83,6 +83,12 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // For Modals
+    const modalClick = document.querySelector('.modal');
+    modalClick.addEventListener('click', (e) => {
+        e.stopPropagation(); 
+    });
+
     // Add tenant form
     const addTenantBtn = document.getElementById("addTenantBtn");
     const mainContentArea = document.getElementById("mainContentArea");
@@ -131,8 +137,25 @@ document.addEventListener('DOMContentLoaded', function() {
     const reportBtn = document.getElementById("reportBtn");
 
 
+    /* ---- OTHER FUNCTIONALITIES ---- */
+    // Form Submissions
     const addRoomForm = document.getElementById('addRoomForm');
     addRoomForm.addEventListener('submit', addRoom);
+
+    const updateRoomForm = document.getElementById('updateRoomForm');
+    updateRoomForm.addEventListener('submit', updateRoom);
+
+    const deleteRoomForm = document.getElementById('deleteRoomForm');
+    deleteRoomForm.addEventListener('submit', async function(event) {
+        event.preventDefault();
+        const roomId = document.getElementById("roomIdDelete").value;
+        const success = await deleteRoom(roomId);
+        
+        if (success) {
+            // Only reset if deletion was successful
+            this.reset();
+        }
+    });
 });
 
 
@@ -214,3 +237,113 @@ async function addRoom(event) {
     }
 }
 // End of Add Room Function
+
+// Update Room Details
+async function updateRoom(event) {
+    event.preventDefault();
+    // IF IN the rooms modal
+    const roomsModal = document.getElementById('roomsModal');
+    const selectedRoomId = roomsModal.querySelector('.roomId').value;
+    const floor = parseInt(document.getElementById("roomFloor").value, 10);
+    const tenants = parseInt(document.getElementById("numTenants").value, 10);
+    const maxRenters = parseInt(document.getElementById("maxRenters").value, 10);
+    const price = parseFloat(document.getElementById("roomPrice") ? document.getElementById("roomPrice").value : "0.00");
+    const status = parseInt(document.getElementById("roomStatus").value, 10);
+
+    console.log("Selected status:", status); // Debugging log
+
+    // If any field is invalid, show a single error message
+    if (!selectedRoomId) {
+        alert("Room ID is required.");
+        return;
+    }
+    if (isNaN(floor) || floor < 0) {
+        alert("Floor must be a non-negative number.");
+        return;
+    }
+    if (isNaN(tenants) || tenants < 0) {
+        alert("Tenants must be a non-negative number.");
+        return;
+    }
+    if (isNaN(maxRenters) || maxRenters < 1) {
+        alert("Max renters must be at least 1.");
+        return;
+    }
+    if (isNaN(price) || price < 0) {
+        alert("Price must be a non-negative number.");
+        return;
+    }
+    if (isNaN(status)) {
+        alert("Status is required.");
+        return;
+    }
+
+    // Gather validated values
+    const updatedRoom = {
+        floor,
+        tenants,
+        max_renters: maxRenters,
+        status,
+        price,
+        room_id: selectedRoomId
+    };
+
+    try {
+        const response = await fetch("/updateRoom", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(updatedRoom)
+        });
+
+        if (response.ok) {
+            alert("Room updated successfully!");
+            closeModal('roomsModal');
+            event.target.reset();
+        } else {
+            alert("Failed to update room.");
+        }
+
+        // Refresh rooms to update the display
+        fetchRooms();
+    } catch (error) {
+        console.error("Error updating room:", error);
+    }
+}
+// End of Update Room Details Function
+
+// Delete Room
+async function deleteRoom(roomId) {
+    if (!roomId) {
+        alert("Please enter a valid Room ID!");
+        return;
+    }
+
+    // Confirm deletion
+    const confirmDeletion = confirm("Are you sure you want to delete this room?");
+    if (!confirmDeletion) {
+        return;
+    }
+
+    try {
+        const response = await fetch(`/deleteRoom/${roomId}`, { method: "DELETE" });
+
+        if (!response.ok) {
+            const errorData = await response.json(); // Parse JSON error response
+            alert(errorData.error); // Show user-friendly message
+            return false; // Prevent further execution
+        }
+
+        alert(`Room ${roomId} deleted successfully!`);
+
+        // Close modal and refresh room list
+        document.getElementById("deleteRoomModal").style.display = "none";
+        fetchRooms();
+
+        return true;
+    } catch (error) {
+        console.error("Error deleting room:", error);
+        alert("An unexpected error occurred while deleting the room.");
+        return false;
+    }
+}
+// End of Delete Room Function
