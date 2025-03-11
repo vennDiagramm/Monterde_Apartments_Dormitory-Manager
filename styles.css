@@ -523,7 +523,6 @@ h2 {
 }
 
 /* Search Tenant Form Styling */
-
 #searchTenantFormContainer { 
     display: none;
     width: 70vw; 
@@ -598,21 +597,64 @@ h2 {
     background: #0056b3;
 }
 
-/* #searchResultsContainer {
-    display: none;
+/* Payment Tenant Form Styling */
+#paymentTenantForm {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 1.2vw;
+    width: 100%;
+    padding-left: 2vw;
+    height: max-content;
 }
 
-.action-btn {
-    background: transparent;
-    color: #007bff;
-    border: none;
-    padding: 0.3vh 0.8vw;
-    margin-right: 0.5vw;
-    border-radius: 0.5vw;
-    transition: 0.2s;
-  }
-  
-  .action-btn:hover {
+/* Input Fields */
+#paymentTenantForm label {
+    font-weight: 500;
+    color: #ddd;
+    font-size: 1.2vw; 
+}
+
+#paymentTenantForm input,
+#paymentTenantForm select {
+    width: 100%;
+    height: 5vh; 
+    padding: 1vh; 
+    font-size: 1vw; 
+    background: #333;
+    border: 0.1vw solid #444;
     color: #fff;
+    border-radius: 1vw;
+    transition: 0.3s;
+}
+
+#paymentTenantForm input:focus,
+#paymentTenantForm select:focus {
+    outline: none;
+    border-color: #777;
+    box-shadow: 0 0 1vw rgba(255, 255, 255, 0.2);
+}
+
+/* Submit Button Container */
+#paymentTenantForm .full-width {
+    grid-column: 1 / -1; /* Span all columns */
+    margin-top: 2vh;
+    display: flex;
+    justify-content: center;
+}
+
+/* Submit Button */
+#paymentTenantForm button {
+    width: 12vw;
+    padding: 1.5vh;
     background: #007bff;
-  } */
+    border: none;
+    color: white;
+    font-size: 1.2vw;
+    border-radius: 1vw;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+#paymentTenantForm button:hover {
+    background: #0056b3;
+}

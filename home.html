@@ -252,8 +252,6 @@
                             <button type="submit" class="btn btn-primary">Submit</button>
                         </div>
                     </form>
-                    
-                    
                 </div>
                 <!-- End of Search Tenant Form -->
 
@@ -449,9 +447,51 @@
                     <!-- End of View Rooms Modal -->
 
                 </div>
-                <!--        END of Room Management     -->
+                <!--     END of Room Management     -->
+
+
+                <!-- Payment Tenant Form --> 
+                <div id="paymentTenantFormContainer" class="container p-4 bg-dark text-white rounded shadow">
+                    <br>
+                    <br>
+                    <br>
+                    <form id="paymentTenantForm" class="row g-3">
+                        <!-- First Row: Name Fields -->
+                        <!-- First Row: Name Fields -->
+                        <div class="col-12">
+                            <label for="start_meter" class="form-label">Previous Meter:</label>
+                            <input type="number" id="start_meter" class="form-control">
+                        </div>
+                        <div class="col-12">
+                            <label for="end_meter" class="form-label">Current Meter:</label>
+                            <input type="number" id="end_meter" class="form-control">
+                        </div>
+                        <div class="col-12">
+                            <label for="water_bill" class="form-label">Water Bill:</label>
+                            <input type="number" id="water_bill" class="form-control">
+                        </div>
+                        <div class="col-12">
+                            <label for="total_rent" class="form-label">Total Rent:</label>
+                            <input type="number" id="total_rent" class="form-control" readonly>
+                        </div>
+                        <div class="col-12">
+                            <label for="payment_input" class="form-label">Payment:</label>
+                            <input type="number" id="payment_input" class="form-control">
+                        </div>
+                        <div class="col-12">
+                            <label for="change_input" class="form-label">Change:</label>
+                            <input type="number" id="change_input" class="form-control">
+                        </div>
+                        
+                        <!-- Last Row: Submit Button Centered -->
+                        <div class="col-12 full-width">
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </div>
+                    </form>
                 </div>
+                <!-- End of Search Tenant Form -->
             </div>
+        </div>
 
     </div>
 

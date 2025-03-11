@@ -564,3 +564,115 @@ async function fetchRooms() {
         console.error("Error fetching rooms:", error);
     }
   }
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const paymentTenantBtn = document.getElementById("paymentBtn");
+    const mainContentArea = document.getElementById("mainContentArea");
+    const paymentTenantFormContainer = document.getElementById("paymentTenantFormContainer");
+    const resultsContainerId = "paymentResultsContainer";
+  
+    // Ensure the payment results container and table exist
+    function ensureResultsContainer() {
+      let resultsContainer = document.getElementById(resultsContainerId);
+      
+      if (!resultsContainer) {
+        resultsContainer = document.createElement("div");
+        resultsContainer.id = resultsContainerId;
+        resultsContainer.className = "mt-4";
+        resultsContainer.innerHTML = `
+          <h2>Pay Them Tents</h2>
+          <div class="table-responsive">
+            <table class="table table-dark table-striped table-hover">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Room</th>
+                  <th>Contact</th>
+                  <th>Move-in Date</th>
+                  <th>Contract End</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="tenantResultsBody">
+                <!-- Initially empty -->
+              </tbody>
+            </table>
+          </div>
+        `;
+  
+        paymentTenantFormContainer.style.display = "block";
+        paymentTenantFormContainer.insertBefore(resultsContainer, paymentTenantFormContainer.firstChild);
+      }
+    }
+  
+    // Sample data
+    const sampleTenants = [
+      {
+        id: 'T001',
+        name: 'John Doe',
+        room: '101',
+        contact: '555-1234',
+        moveInDate: '2024-01-15',
+        contractEnd: '2025-01-14',
+        status: 'Active'
+      },
+      {
+        id: 'T002',
+        name: 'Jane Smith',
+        room: '202',
+        contact: '555-5678',
+        moveInDate: '2023-11-01',
+        contractEnd: '2024-10-31',
+        status: 'Active'
+      }
+    ];
+  
+    // Function to populate the table
+    function populateTable() {
+      ensureResultsContainer(); // Ensure table exists before accessing it
+  
+      const resultsBody = document.getElementById("tenantResultsBody");
+      if (resultsBody) {
+        resultsBody.innerHTML = ''; // Clear previous content
+  
+        sampleTenants.forEach(tenant => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${tenant.id}</td>
+            <td>${tenant.name}</td>
+            <td>${tenant.room}</td>
+            <td>${tenant.contact}</td>
+            <td>${tenant.moveInDate}</td>
+            <td>${tenant.contractEnd}</td>
+            <td><span class="badge bg-success">${tenant.status}</span></td>
+            <td>
+              <button class="action-btn" title="View Details"><i class="bi bi-eye"></i></button>
+              <button class="action-btn" title="Edit"><i class="bi bi-pencil"></i></button>
+            </td>
+          `;
+          resultsBody.appendChild(row);
+        });
+      }
+    }
+  
+    // Populate table when page loads
+    populateTable();
+  
+    // Payment Tenant Button Click
+    if (paymentTenantBtn && mainContentArea && paymentTenantFormContainer) {
+      paymentTenantBtn.addEventListener("click", function() {
+        // Clear main content area
+        mainContentArea.innerHTML = "";
+  
+        // Ensure table exists, then populate it
+        populateTable();
+  
+        // Add to main content area
+        mainContentArea.appendChild(paymentTenantFormContainer);
+      });
+    }
+  });
+  
+// End of Payment Function
