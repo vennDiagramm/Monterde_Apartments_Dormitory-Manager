@@ -30,6 +30,10 @@
                 <div class="menu-btn-container text-center border-bottom">
                     <button class="menu-btn w-100" id="addTenantBtn">Add Tenant</button>
                 </div>
+
+                <div class="menu-btn-container text-center border-bottom">
+                    <button class="menu-btn w-100" id="editTenantBtn">Edit Tenant</button>
+                </div>
                 
                 <div class="menu-btn-container text-center border-bottom">
                     <button class="menu-btn w-100" id="dismissTenentBtn">Dismiss Tenant</button>
@@ -218,32 +222,32 @@
 
                     <form id="updateRoomsForm" class="row g-3">
                         <!--    First Row:  -->
-                        <div class="col-12">
+                        <div class="col-auto">
                             <label for="roomId" class="form-label">Select Room ID</label>
                             <select id="roomId" class="form-select" required>
                                 <option value="">Select a Room</option>
                             </select>
                         </div>
-                        <div class="col-12">
+                        <div class="col-auto">
                             <label for="roomFloor" class="form-label">Room Floor</label>
                             <input type="text" id="roomFloor" class="form-control">
                         </div>
-                        <div class="col-12">
+                        <div class="col-auto">
                             <label for="numTenants" class="form-label">Number of Tenants</label>
                             <input type="text" id="numTenants" class="form-control">
                         </div>
 
                         <!--    Second Row:    -->
-                        <div class="col-12">
+                        <div class="col-auto">
                             <label for="maxRenters" class="form-label">Max Renters</label>
                             <input type="text" id="maxRenters" class="form-control">
                         </div>
-                        <div class="col-12">
+                        <div class="col-auto">
                             <label for="roomPrice" class="form-label">Room Price</label>
                             <input type="date" id="roomPrice" class="form-control">
                         </div>
                         
-                        <div class="col-12">
+                        <div class="col-auto">
                             <label for="roomStatus" class="form-label">Room Status</label>
                             <select id="roomStatus" class="form-select" required>
                                 <option value="1">Vacant</option>
@@ -255,8 +259,8 @@
                         </div>
 
                         <!-- Last Row: Submit Button Centered -->
-                        <div class="col-12 full-width">
-                            <button type="submit" class="btn btn-primary">Submit</button>
+                        <div class="text-center">
+                            <button id="updateRoom" type="submit" class="btn btn-danger">Submit</button>
                         </div>
                     </form>
                 </div>
