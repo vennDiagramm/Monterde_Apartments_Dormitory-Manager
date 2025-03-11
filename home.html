@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Monterde Apartments</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"> <!-- my icons in drop down of room hehe -->
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
@@ -289,18 +290,18 @@
 
                         <!-- More Options Toggle -->
                         <div class="p-3 bg-dark">
-                            <button class="btn btn-secondary d-block w-100 mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#moreOptions">
-                              More Options ▼
+                            <button class="btn btn-secondary d-block w-100 mb-3"  type="button"  data-bs-toggle="collapse"  data-bs-target="#moreOptions"  aria-expanded="false"> 
+                            More Options &nbsp;<i class="bi bi-caret-down-fill"></i>
                             </button>
                             
-                            <div id="moreOptions" class="collapse show">
+                            <div id="moreOptions" class="collapse">
                               <div class="d-flex gap-3 mb-3">
                                 <button type="button" id="addRoom" class="btn btn-primary flex-fill px-4">Add</button>
                                 <button type="button" id="deleteRoom" class="btn btn-danger flex-fill px-4">Demolish</button>
                               </div>
                               <button type="button" id="viewRooms" class="btn btn-info w-100">View</button>
                             </div>
-                          </div>
+                        </div>
                     </form>
                     
                     <!-- Add Room Modal -->
