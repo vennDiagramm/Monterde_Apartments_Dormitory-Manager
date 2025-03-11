@@ -73,6 +73,10 @@ body {
     line-height: 1.4;
 }
 
+.btn-icon {
+    width: 40px;
+    height: auto;
+}
 .menu-btn:hover {
     background-color: #333;
 }
