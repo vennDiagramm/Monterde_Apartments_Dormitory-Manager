@@ -503,7 +503,7 @@ document.addEventListener('DOMContentLoaded', function() {
           resultsContainer.id = "searchResultsContainer";
           resultsContainer.className = "mt-4";
           resultsContainer.innerHTML = `
-            <h4 class="text-white mb-3">Tenant Information</h4>
+            <h2>Search a Tenant</h2>
             <div class="table-responsive">
               <table class="table table-dark table-striped table-hover">
                 <thead>
@@ -527,7 +527,7 @@ document.addEventListener('DOMContentLoaded', function() {
           
           // Append both form and results container
           searchTenantFormContainer.style.display = "block";
-          searchTenantFormContainer.appendChild(resultsContainer);
+          searchTenantFormContainer.insertBefore(resultsContainer, searchTenantFormContainer.firstChild);
         }
         
         // Add to main content area
