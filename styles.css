@@ -26,6 +26,14 @@ body {
     border-right: 1px solid #333;
     z-index: 100;
     position: relative;
+    overflow-y: auto;  /*Enable vertical scrolling*/
+    scrollbar-width: none;  /*FireFox*/
+    -ms-overflow-style: none; /*Internet Ex and Edge*/
+}
+
+/* For Chrome, Safari, and Opera */
+.sidebar::-webkit-scrollbar {
+    display: none;
 }
 
 .dropdown-container {
