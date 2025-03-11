@@ -61,6 +61,13 @@ body {
     padding: 0;
 }
 
+.logo-icon {
+    width: 80px;
+    height: auto;
+    margin: 0px;
+    margin-left: 85px;
+    padding: 0px;
+}
 .menu-btn {
     background-color: #1a1a1a;
     color: #fff;
