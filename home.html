@@ -49,6 +49,13 @@
                         Dismiss Tenant
                     </button>
                 </div>
+
+                <div class="menu-btn-container text-center border-bottom">
+                    <button class="menu-btn w-100" id="searchTenantBtn">
+                        <img src="images\search_tenant.png" alt="Search Icon" class="btn-icon">
+                        Search Tenant
+                    </button>
+                </div>
                 
                 <div class="menu-btn-container text-center ">
                     <button class="menu-btn w-100" id="roomsBtn">
@@ -228,6 +235,25 @@
                         </div>
                     </form>
                 </div>
+
+                <!-- Search Tenant Form --> 
+                <div id="searchTenantFormContainer" class="container p-4 bg-dark text-white rounded shadow">
+                    <h2>Search a Tenant</h2>
+                    <form id="searchTenantForm" class="row g-3">
+                        <!-- First Row: Name Fields -->
+                        <div class="col-12">
+                            <label for="userInput" class="form-label">Enter Tenant ID, Name, or Type "All" to show every Tenant Record:</label>
+                            <input type="text" id="userInput" class="form-control">
+                        </div>
+                        <!-- Last Row: Submit Button Centered -->
+                        <div class="col-12 full-width">
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </div>
+                    </form>
+                    
+                    
+                </div>
+                <!-- End of Search Tenant Form -->
 
                 <!--        Room Management     -->
                 <div id="roomsFormContainer" class="container p-4 bg-dark text-white rounded shadow mt-3">
