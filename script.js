@@ -214,3 +214,112 @@ async function addRoom(event) {
     }
 }
 // End of Add Room Function
+
+// Search Function
+document.addEventListener('DOMContentLoaded', function() {
+  const searchTenantBtn = document.getElementById("searchTenantBtn");
+  const mainContentArea = document.getElementById("mainContentArea");
+  const searchTenantFormContainer = document.getElementById("searchTenantFormContainer");
+  const searchForm = document.getElementById("searchTenantForm");
+  const resultsBody = document.getElementById("tenantResultsBody");
+  
+  // Search Tenant Button Click
+  if (searchTenantBtn && mainContentArea && searchTenantFormContainer) {
+    searchTenantBtn.addEventListener("click", function() {
+      // Clear main content area
+      mainContentArea.innerHTML = "";
+      
+      // Create the search results container if it doesn't exist yet
+      if (!document.getElementById("searchResultsContainer")) {
+        const resultsContainer = document.createElement("div");
+        resultsContainer.id = "searchResultsContainer";
+        resultsContainer.className = "mt-4";
+        resultsContainer.innerHTML = `
+          <h4 class="text-white mb-3">Tenant Information</h4>
+          <div class="table-responsive">
+            <table class="table table-dark table-striped table-hover">
+              <thead>
+                <tr>
+                  <th>ID</th>
+                  <th>Name</th>
+                  <th>Room</th>
+                  <th>Contact</th>
+                  <th>Move-in Date</th>
+                  <th>Contract End</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="tenantResultsBody">
+                <!-- Initially empty -->
+              </tbody>
+            </table>
+          </div>
+        `;
+        
+        // Append both form and results container
+        searchTenantFormContainer.style.display = "block";
+        searchTenantFormContainer.appendChild(resultsContainer);
+      }
+      
+      // Add to main content area
+      mainContentArea.appendChild(searchTenantFormContainer);
+    });
+  }
+  
+  // Form submission
+  if (searchForm) {
+    searchForm.addEventListener("submit", function(e) {
+      e.preventDefault();
+      
+      // Sample data - would come from your backend in a real app
+      const sampleTenants = [
+        {
+          id: 'T001',
+          name: 'John Doe',
+          room: '101',
+          contact: '555-1234',
+          moveInDate: '2024-01-15',
+          contractEnd: '2025-01-14',
+          status: 'Active'
+        },
+        {
+          id: 'T002',
+          name: 'Jane Smith',
+          room: '202',
+          contact: '555-5678',
+          moveInDate: '2023-11-01',
+          contractEnd: '2024-10-31',
+          status: 'Active'
+        }
+      ];
+      
+      // Get reference to results body again (might have been recreated)
+      const resultsBody = document.getElementById("tenantResultsBody");
+      if (resultsBody) {
+        // Clear previous results
+        resultsBody.innerHTML = '';
+        
+        // Populate table with results
+        sampleTenants.forEach(tenant => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${tenant.id}</td>
+            <td>${tenant.name}</td>
+            <td>${tenant.room}</td>
+            <td>${tenant.contact}</td>
+            <td>${tenant.moveInDate}</td>
+            <td>${tenant.contractEnd}</td>
+            <td><span class="badge bg-success">${tenant.status}</span></td>
+            <td>
+              <button class="action-btn" title="View Details"><i class="bi bi-eye"></i></button>
+              <button class="action-btn" title="Edit"><i class="bi bi-pencil"></i></button>
+            </td>
+          `;
+          resultsBody.appendChild(row);
+        });
+      }
+    });
+  }
+});
+// End of Search Function
