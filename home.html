@@ -263,7 +263,33 @@
 
                         <!-- Last Row: Submit Button Centered -->
                         <div class="text-center">
-                            <button id="updateRoom" type="submit" class="btn btn-danger">Submit</button>
+                            <button id="updateRoom" type="submit" class="btn btn-primary">Submit</button>
+                        </div>
+
+                        <!-- More Options Toggle -->
+                        <button class="btn dropdown-toggle w-100" type="button" id="dropdownMenuButton" data-bs-toggle="collapse" data-bs-target="#moreOptionsCollapse" aria-expanded="false">
+                            More Options
+                        </button>
+                        
+                        <div class="collapse" id="moreOptionsCollapse">
+                            <div class="card card-body p-2">
+                            <!-- Top row with two options side by side -->
+                            <div class="row mb-2">
+                                <div class="col-6">
+                                <a class="btn btn-outline-secondary w-100" href="#">Add Room</a>
+                                </div>
+                                <div class="col-6">
+                                <a class="btn btn-outline-secondary w-100" href="#">Delete Room</a>
+                                </div>
+                            </div>
+                            
+                            <!-- Bottom row spanning full width -->
+                            <div class="row">
+                                <div class="col-12">
+                                <a class="btn btn-outline-secondary w-100" href="#">View All Rooms</a>
+                                </div>
+                            </div>
+                            </div>
                         </div>
                     </form>
                 </div>
