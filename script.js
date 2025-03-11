@@ -129,6 +129,15 @@ document.addEventListener('DOMContentLoaded', function() {
         })
     }
 
+    // get room view via apartment || see what rooms are available
+    roomsBtn.addEventListener("click", async function () {
+        const aptLocId = await getCurrentApartment();
+        
+        const response = await fetch(`/getFullRoomView/${aptLocId}`);
+        const rooms = await response.json();
+        populateRoomTable(rooms);
+    });
+
 
     // Payment
     const paymentBtn = document.getElementById("paymentBtn");
@@ -156,6 +165,15 @@ document.addEventListener('DOMContentLoaded', function() {
             this.reset();
         }
     });
+
+    // For the view all rooms button in the room management
+    const viewAllRooms = document.getElementById("viewRooms");
+    viewAllRooms.addEventListener("click", async function() {
+        fetchRooms();
+        const response = await fetch(`/viewAll`);
+        const rooms = await response.json();
+        viewAllRooms(rooms);
+    })  
 });
 
 
@@ -170,7 +188,7 @@ async function addRoom(event) {
     let number_of_Renters = 0;
     
     // Get the apartment name
-    const apartmentName = getCurrentApartment();
+    const apartmentName = await getCurrentApartment();
     
     // Map apartments to their Apt_Loc_ID
     const apartmentMap = {
@@ -237,6 +255,7 @@ async function addRoom(event) {
     }
 }
 // End of Add Room Function
+
 // Update Room Details
 async function updateRoom(event) {
     event.preventDefault();
@@ -347,6 +366,78 @@ async function deleteRoom(roomId) {
 }
 // End of Delete Room Function
 
+// Populate the room table with room details || pag open sa rooms
+async function populateRoomTable(rooms) {
+    const tbody = document.getElementById('roomTable').querySelector('tbody');
+    tbody.innerHTML = '';  // Clear existing table data
+    rooms.forEach(room => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${room.Room_ID}</td>
+            <td>${room.Room_floor}</td>
+            <td>${room.Number_of_Renters}</td>
+            <td>${room.Room_maxRenters}</td>
+            <td>₱${room.Room_Price.toLocaleString()}</td>
+            <td>${room.Room_Status_Desc}</td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+// End of Populate room with details
+
+// View All Rooms || Inside rooms >> view all
+async function viewAllRooms(rooms) {
+    const tbody = document.getElementById('allRoomsTable').querySelector('tbody');
+    tbody.innerHTML = '';  // Clear existing table data
+    rooms.forEach(room => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${room.Room_ID}</td>
+            <td>${room.Room_floor}</td>
+            <td>${room.Number_of_Renters}</td>
+            <td>${room.Room_maxRenters}</td>
+            <td>₱${room.Room_Price.toLocaleString()}</td>
+            <td>${room.Room_Status_Desc}</td>
+            <td>${room.Apt_Location}</td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+// End of View All Rooms Function
+
+// Update room dropdown based on selected apartment
+async function updateRoomDropdown() {
+    const roomDropdowns = document.querySelectorAll(".roomId"); // Select multiple elements
+    if (roomDropdowns.length === 0) return;
+
+    const aptLocId = await getCurrentApartment(); // Get the current apartment number
+    if (!aptLocId) return; // Exit if no valid apartment ID
+
+    roomDropdowns.forEach(dropdown => {
+        dropdown.innerHTML = ""; // Clear existing options
+
+        // Fetch available rooms from the database
+        fetch(`/getRooms/${aptLocId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.length === 0) {
+                    let option = document.createElement("option");
+                    option.textContent = "No available rooms";
+                    dropdown.appendChild(option);
+                } else {
+                    data.forEach(room => {
+                        let option = document.createElement("option");
+                        option.value = room.Room_ID;
+                        option.textContent = `Room ${room.Room_ID}`;
+                        dropdown.appendChild(option);
+                    });
+                }
+            })
+            .catch(error => console.error("Error fetching rooms:", error));
+    });
+}
+// End of Update room dropdown based on selected apartment
+
 
 // Search Function
 document.addEventListener('DOMContentLoaded', function() {
@@ -455,4 +546,21 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     }
   });
-  // End of Search Function
+// End of Search Function
+
+
+// Check Rooms
+async function fetchRooms() {
+    try {
+        const response = await fetch('/rooms');
+        const rooms = await response.json();
+  
+        // Make sure at least one room exists
+        if (rooms.length > 0) {
+            document.getElementsByClassName('requests-bar')[0].value = 
+                `Room ${rooms[0].Room_ID} - ₱${rooms[0].Room_Price.toLocaleString()}`;
+        }
+    } catch (error) {
+        console.error("Error fetching rooms:", error);
+    }
+  }
