@@ -229,7 +229,7 @@
                 <!--        Room Management     -->
                 <div id="roomsFormContainer" class="container p-4 bg-dark text-white rounded shadow mt-3">
                     <h2>Manage Rooms</h2>    
-                    <table id="roomTable" class="table-dark table-striped table-hover">
+                    <table id="roomTable" class="table table-dark table-striped table-hover">
                         <thead>
                             <tr>
                                 <th>Room ID</th>
@@ -247,32 +247,31 @@
 
                     <form id="updateRoomsForm" class="row g-3">
                         <!--    First Row:  -->
-                        <div class="col-auto">
+                        <div class="col-md-4">
                             <label for="roomId" class="form-label">Select Room ID</label>
                             <select id="roomId" class="form-select" required>
                                 <option value="">Select a Room</option>
                             </select>
                         </div>
-                        <div class="col-auto">
+                        <div class="col-md-4">
                             <label for="roomFloor" class="form-label">Room Floor</label>
                             <input type="text" id="roomFloor" class="form-control">
                         </div>
-                        <div class="col-auto">
+                        <div class="col-md-4">
                             <label for="numTenants" class="form-label">Number of Tenants</label>
                             <input type="text" id="numTenants" class="form-control">
                         </div>
 
                         <!--    Second Row:    -->
-                        <div class="col-auto">
+                        <div class="col-md-4">
                             <label for="maxRenters" class="form-label">Max Renters</label>
                             <input type="text" id="maxRenters" class="form-control">
                         </div>
-                        <div class="col-auto">
+                        <div class="col-md-4">
                             <label for="roomPrice" class="form-label">Room Price</label>
-                            <input type="date" id="roomPrice" class="form-control">
+                            <input type="number" id="roomPrice" class="form-control">
                         </div>
-                        
-                        <div class="col-auto">
+                        <div class="col-md-4">
                             <label for="roomStatus" class="form-label">Room Status</label>
                             <select id="roomStatus" class="form-select" required>
                                 <option value="1">Vacant</option>
@@ -284,36 +283,123 @@
                         </div>
 
                         <!-- Last Row: Submit Button Centered -->
-                        <div class="text-center">
+                        <div class="col-12 text-center mt-3">
                             <button id="updateRoom" type="submit" class="btn btn-primary">Submit</button>
                         </div>
 
                         <!-- More Options Toggle -->
-                        <button class="btn dropdown-toggle w-100" type="button" id="dropdownMenuButton" data-bs-toggle="collapse" data-bs-target="#moreOptionsCollapse" aria-expanded="false">
-                            More Options
-                        </button>
-                        
-                        <div class="collapse" id="moreOptionsCollapse">
-                            <div class="card card-body p-2">
-                            <!-- Top row with two options side by side -->
-                            <div class="row mb-2">
-                                <div class="col-6">
-                                <a class="btn btn-outline-secondary w-100" href="#">Add Room</a>
-                                </div>
-                                <div class="col-6">
-                                <a class="btn btn-outline-secondary w-100" href="#">Delete Room</a>
-                                </div>
-                            </div>
+                        <div class="p-3 bg-dark">
+                            <button class="btn btn-secondary d-block w-100 mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#moreOptions">
+                              More Options ▼
+                            </button>
                             
-                            <!-- Bottom row spanning full width -->
-                            <div class="row">
-                                <div class="col-12">
-                                <a class="btn btn-outline-secondary w-100" href="#">View All Rooms</a>
-                                </div>
+                            <div id="moreOptions" class="collapse show">
+                              <div class="d-flex gap-3 mb-3">
+                                <button type="button" id="addRoom" class="btn btn-primary flex-fill px-4">Add</button>
+                                <button type="button" id="deleteRoom" class="btn btn-danger flex-fill px-4">Demolish</button>
+                              </div>
+                              <button type="button" id="viewRooms" class="btn btn-info w-100">View</button>
                             </div>
+                          </div>
+                    </form>
+                    
+                    <!-- Add Room Modal -->
+                    <div class="modal fade" id="addRoomModal" tabindex="-1" aria-labelledby="addRoomModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content bg-dark text-white">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="addRoomModalLabel">Add Room</h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form id="addRoomForm" class="row g-3">
+                                        <div class="col-md-4">
+                                            <label for="roomFloorAdd" class="form-label">Room Floor</label>
+                                            <input type="number" id="roomFloorAdd" class="form-control" min="0">
+                                        </div>
+                                        
+                                        <div class="col-md-4">
+                                            <label for="maxRentersAdd" class="form-label">Max Renters</label>
+                                            <input type="number" id="maxRentersAdd" class="form-control" min="0">
+                                        </div>
+
+                                        <div class="col-md-4">
+                                            <label for="roomPriceAdd" class="form-label">Room Price</label>
+                                            <input type="number" id="roomPriceAdd" class="form-control" min="0" step="0.01">
+                                        </div>
+
+                                        <div class="col-12">
+                                            <label for="roomStatusAdd" class="form-label">Room Status</label>
+                                            <select id="roomStatusAdd" class="form-select">
+                                                <option value="1">Vacant</option>
+                                                <option value="2">Occupied</option>
+                                                <option value="3">Maintenance</option>
+                                                <option value="4">Reserve</option>
+                                                <option value="5">Unavailable</option>
+                                            </select>
+                                        </div>
+                                        
+                                        <div class="col-12 text-center mt-3">
+                                            <button type="submit" class="btn btn-primary">Add Room</button>
+                                        </div>
+                                    </form>
+                                </div>
                             </div>
                         </div>
-                    </form>
+                    </div>
+                    <!-- End of Add Room Modal -->
+
+                    <!-- Delete Room Modal -->
+                    <div class="modal fade" id="deleteRoomModal" tabindex="-1" aria-labelledby="deleteRoomModalLabel" aria-hidden="true">
+                        <div class="modal-dialog">
+                            <div class="modal-content bg-dark text-white">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="deleteRoomModalLabel">Delete Room</h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form id="deleteRoomForm">
+                                        <div class="mb-3">
+                                            <label for="roomIdDelete" class="form-label">Room ID</label>
+                                            <input type="number" id="roomIdDelete" class="form-control" required>
+                                        </div>
+                                        <div class="text-center">
+                                            <button type="submit" class="btn btn-danger">Delete Room</button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- End of Delete Room Modal -->
+                    
+                    <!-- View Rooms Collapsible Section -->
+                    <div class="collapse mt-4" id="viewRoomsCollapse">
+                        <div class="card card-body bg-dark border-secondary">
+                            <h5>All Rooms</h5>
+                            <div class="table-responsive">
+                                <table id="allRoomsTable" class="table table-dark table-striped table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>Room ID</th>
+                                            <th>Floor</th>
+                                            <th>Number of Renters</th> 
+                                            <th>Max Renters</th>
+                                            <th>Price</th>
+                                            <th>Status</th>
+                                            <th>Apartment Location</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <!-- Room data will be inserted here -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- End of View Rooms Collapsible Section -->
+                </div>
+                <!--        END of Room Management     -->
                 </div>
             </div>
 
