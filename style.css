@@ -114,6 +114,7 @@ body::before {
     position: absolute;
     top: 10px; /* Adjust position inside the mouse */
     animation: bounce 1.5s infinite ease-in-out;
+    left: 12.3px;
 }
 
 /* Bouncing Animation */
@@ -175,6 +176,14 @@ body::before {
     z-index: 19; /* Ensure it's above the slideshow */
     width: 100%; /* Helps with centering */
     pointer-events: none
+}
+
+.welcome-container .text {
+    pointer-events: auto;
+}
+
+.welcome-container .custom-btn {
+    pointer-events: auto;
 }
 
 .location-text {
@@ -245,7 +254,7 @@ body::before {
 }
 
 /* Move subtext to the bottom of the screen */
-/* .subtext {
+.subtext {
     position: absolute;
     bottom: -270px;
     left: 50%;
@@ -254,11 +263,11 @@ body::before {
     font-weight: bold;
     text-align: center;
     width: 100%;
-} */
+}
 
-.custom-btn {
+/* .custom-btn {
     position: absolute;
-    bottom: -150px; /* Adjust as needed */
+    bottom: -150px;
     left: 50%;
     transform: translateX(-50%);
     background: transparent;
@@ -278,4 +287,4 @@ body::before {
 .custom-btn:hover {
     background: white;
     color: black;
-}
+} */
