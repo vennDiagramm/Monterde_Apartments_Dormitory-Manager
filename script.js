@@ -624,19 +624,13 @@ async function fetchRooms() {
         resultsContainer.id = resultsContainerId;
         resultsContainer.className = "mt-4";
         resultsContainer.innerHTML = `
-          <h2>Pay Them Tents</h2>
+          <h2>Payment</h2>
           <div class="table-responsive">
             <table class="table table-dark table-striped table-hover">
               <thead>
                 <tr>
-                  <th>ID</th>
                   <th>Name</th>
-                  <th>Room</th>
-                  <th>Contact</th>
-                  <th>Move-in Date</th>
-                  <th>Contract End</th>
-                  <th>Status</th>
-                  <th>Actions</th>
+                  <th>Rent Status</th>
                 </tr>
               </thead>
               <tbody id="tenantResultsBody">
@@ -654,22 +648,12 @@ async function fetchRooms() {
     // Sample data
     const sampleTenants = [
       {
-        id: 'T001',
         name: 'John Doe',
-        room: '101',
-        contact: '555-1234',
-        moveInDate: '2024-01-15',
-        contractEnd: '2025-01-14',
-        status: 'Active'
+        rent: 'Paid'
       },
       {
-        id: 'T002',
-        name: 'Jane Smith',
-        room: '202',
-        contact: '555-5678',
-        moveInDate: '2023-11-01',
-        contractEnd: '2024-10-31',
-        status: 'Active'
+        name: 'Jane Doe',
+        rent: 'Not yet Paid'
       }
     ];
   
@@ -684,13 +668,8 @@ async function fetchRooms() {
         sampleTenants.forEach(tenant => {
           const row = document.createElement('tr');
           row.innerHTML = `
-            <td>${tenant.id}</td>
             <td>${tenant.name}</td>
-            <td>${tenant.room}</td>
-            <td>${tenant.contact}</td>
-            <td>${tenant.moveInDate}</td>
-            <td>${tenant.contractEnd}</td>
-            <td><span class="badge bg-success">${tenant.status}</span></td>
+            <td>${tenant.rent}</td>
             <td>
               <button class="action-btn" title="View Details"><i class="bi bi-eye"></i></button>
               <button class="action-btn" title="Edit"><i class="bi bi-pencil"></i></button>
