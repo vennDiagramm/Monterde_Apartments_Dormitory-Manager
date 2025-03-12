@@ -618,93 +618,145 @@ async function fetchRooms() {
     }
   }
 
-  document.addEventListener('DOMContentLoaded', function() {
+
+// Payment Function
+document.addEventListener('DOMContentLoaded', function () {
     const paymentTenantBtn = document.getElementById("paymentBtn");
     const mainContentArea = document.getElementById("mainContentArea");
     const paymentTenantFormContainer = document.getElementById("paymentTenantFormContainer");
     const resultsContainerId = "paymentResultsContainer";
-  
+
     // Ensure the payment results container and table exist
     function ensureResultsContainer() {
-      let resultsContainer = document.getElementById(resultsContainerId);
-      
-      if (!resultsContainer) {
-        resultsContainer = document.createElement("div");
-        resultsContainer.id = resultsContainerId;
-        resultsContainer.className = "mt-4";
-        resultsContainer.innerHTML = `
-          <h2>Payment</h2>
-          <div class="table-responsive">
-            <table class="table table-dark table-striped table-hover">
-              <thead>
-                <tr>
-                  <th>Name</th>
-                  <th>Rent Status</th>
-                </tr>
-              </thead>
-              <tbody id="tenantResultsBody">
-                <!-- Initially empty -->
-              </tbody>
-            </table>
-          </div>
-        `;
-  
-        paymentTenantFormContainer.style.display = "block";
-        paymentTenantFormContainer.insertBefore(resultsContainer, paymentTenantFormContainer.firstChild);
-      }
+        let resultsContainer = document.getElementById(resultsContainerId);
+
+        if (!resultsContainer) {
+            resultsContainer = document.createElement("div");
+            resultsContainer.id = resultsContainerId;
+            resultsContainer.className = "mt-4";
+            resultsContainer.innerHTML = `
+                <h2>Payment</h2>
+                <div class="table-responsive">
+                    <table class="table table-dark table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Room ID</th>
+                                <th>Name</th>
+                                <th>Rent Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tenantResultsBody">
+                            <!-- Initially empty -->
+                        </tbody>
+                    </table>
+                </div>
+            `;
+
+            paymentTenantFormContainer.style.display = "block";
+            paymentTenantFormContainer.insertBefore(resultsContainer, paymentTenantFormContainer.firstChild);
+        }
     }
-  
+
     // Sample data
     const sampleTenants = [
-      {
-        name: 'John Doe',
-        rent: 'Paid'
-      },
-      {
-        name: 'Jane Doe',
-        rent: 'Not yet Paid'
-      }
+        { id: "101", name: 'John Doe', rent: 'Paid' },
+        { id: "102", name: 'Jane Doe', rent: 'Not yet Paid' }
     ];
-  
+
     // Function to populate the table
     function populateTable() {
-      ensureResultsContainer(); // Ensure table exists before accessing it
-  
-      const resultsBody = document.getElementById("tenantResultsBody");
-      if (resultsBody) {
-        resultsBody.innerHTML = ''; // Clear previous content
-  
-        sampleTenants.forEach(tenant => {
-          const row = document.createElement('tr');
-          row.innerHTML = `
-            <td>${tenant.name}</td>
-            <td>${tenant.rent}</td>
-            <td>
-              <button class="action-btn" title="View Details"><i class="bi bi-eye"></i></button>
-              <button class="action-btn" title="Edit"><i class="bi bi-pencil"></i></button>
-            </td>
-          `;
-          resultsBody.appendChild(row);
-        });
-      }
+        ensureResultsContainer(); // Ensure table exists before accessing it
+        const resultsBody = document.getElementById("tenantResultsBody");
+
+        if (resultsBody) {
+            resultsBody.innerHTML = ''; // Clear previous content
+
+            sampleTenants.forEach(tenant => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${tenant.id}</td>
+                    <td>${tenant.name}</td>
+                    <td>${tenant.rent}</td>
+                `;
+                resultsBody.appendChild(row);
+            });
+        }
     }
-  
+
     // Populate table when page loads
     populateTable();
-  
+
     // Payment Tenant Button Click
     if (paymentTenantBtn && mainContentArea && paymentTenantFormContainer) {
-      paymentTenantBtn.addEventListener("click", function() {
-        // Clear main content area
-        mainContentArea.innerHTML = "";
-  
-        // Ensure table exists, then populate it
-        populateTable();
-  
-        // Add to main content area
-        mainContentArea.appendChild(paymentTenantFormContainer);
-      });
+        paymentTenantBtn.addEventListener("click", function () {
+            // Clear main content area
+            mainContentArea.innerHTML = "";
+
+            // Create the payment results container if it doesn't exist yet
+            if (!document.getElementById("paymentResultsContainer")) {
+                const resultsContainer = document.createElement("div");
+                resultsContainer.id = "paymentResultsContainer";
+                resultsContainer.className = "mt-4";
+                resultsContainer.innerHTML = `
+                    <h2>Payment Tenant</h2>
+                    <div class="table-responsive">
+                        <table class="table table-dark table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Room ID</th>
+                                    <th>Name</th>
+                                    <th>Rent Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tenantResultsBody">
+                                <!-- Initially empty -->
+                            </tbody>
+                        </table>
+                    </div>
+                `;
+
+                // Append both form and results container
+                paymentTenantFormContainer.style.display = "block";
+                paymentTenantFormContainer.insertBefore(resultsContainer, paymentTenantFormContainer.firstChild);
+            }
+
+            // Add to main content area
+            mainContentArea.appendChild(paymentTenantFormContainer);
+        });
     }
-  });
-  
+
+    // Form submission
+    paymentForm.addEventListener("submit", function (e) {
+        e.preventDefault();
+
+        // Sample data - would come from your backend in a real app
+        const sampleTenants = [
+            { id: 'T001', name: 'John Doe', rentStatus: 'Paid' },
+            { id: 'T002', name: 'Jane Doe', rentStatus: 'Not yet Paid' }
+        ];
+
+        // Get reference to results body again (might have been recreated)
+        const resultsBody = document.getElementById("tenantResultsBody");
+
+        if (resultsBody) {
+            // Clear previous results
+            resultsBody.innerHTML = '';
+
+            // Populate table with results
+            sampleTenants.forEach(tenant => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${tenant.id}</td>
+                    <td>${tenant.name}</td>
+                    <td>${tenant.rentStatus}</td>
+                    <td>
+                        <button class="action-btn" title="View Details"><i class="bi bi-eye"></i></button>
+                        <button class="action-btn" title="Edit"><i class="bi bi-pencil"></i></button>
+                    </td>
+                `;
+                resultsBody.appendChild(row);
+            });
+        }
+    });
+});
 // End of Payment Function
