@@ -1,7 +1,7 @@
 /* SWALLL */
-Swal.mixin({
-    background: "#222",
-    color: "#fff",
+const mySwalala = Swal.mixin({
+    background: "#bfbfbf",
+    color: "#1a1a1a",
     confirmButtonColor: "#007bff" // Bootstrap blue
 });
 
@@ -189,7 +189,10 @@ document.addEventListener('DOMContentLoaded', function() {
         
         if (success) {
             // Only reset if deletion was successful
+            const modal = bootstrap.Modal.getInstance(document.getElementById('deleteRoomModal'));
+            modal.hide();
             this.reset();
+            fetchRooms();
         }
     });
 
@@ -235,7 +238,7 @@ async function removeTenant(event) {
         console.error("Error removing tenant:", error);
         alert("Failed to remove tenant. " + error.message);
     }
-  }
+}
 // End of Remove a Tenant Function
 
 // Add Room
@@ -253,10 +256,11 @@ async function addRoom(event) {
     
     // Validate apartment ID
     if (!apt_loc) {
-        Swal.fire({
+        mySwalala.fire({
             title: "Error!",
             text: "Invalid apartment location.",
             icon: "error",
+            iconColor: "#8B0000",
             background: "#222",
             color: "#fff",
             confirmButtonColor: "#dc3545"
@@ -265,23 +269,55 @@ async function addRoom(event) {
     }
     
     // Validate input fields
-    if (isNaN(floor) || floor < 0) {
-        Swal.fire({ title: "Error!", text: "Floor must be a non-negative number.", icon: "error", background: "#222", color: "#fff", confirmButtonColor: "#dc3545" });
+    if (isNaN(floor) || floor <= 0) {
+        mySwalala.fire({ 
+            title: "Error!", 
+            text: "Floor must be a non-negative number.", 
+            icon: "error", 
+            iconColor: "#8B0000",
+            background: "#222", 
+            color: "#fff", 
+            confirmButtonColor: "#8B0000" 
+        });
         return;
     }
     if (isNaN(maxRenters) || maxRenters < 1) {
-        Swal.fire({ title: "Error!", text: "Max renters must be at least 1.", icon: "error", background: "#222", color: "#fff", confirmButtonColor: "#dc3545" });
+        mySwalala.fire({ 
+            title: "Error!", 
+            text: "Max renters must be at least 1.", 
+            icon: "error", 
+            iconColor: "#8B0000",
+            background: "#222", 
+            color: "#fff", 
+            confirmButtonColor: "#8B0000" 
+        });
         return;
     }
-    if (isNaN(price) || price < 0) {
-        Swal.fire({ title: "Error!", text: "Price must be a non-negative number.", icon: "error", background: "#222", color: "#fff", confirmButtonColor: "#dc3545" });
+    if (isNaN(price) || price <= 0) {
+        mySwalala.fire({ 
+            title: "Error!", 
+            text: "Price must be a non-negative number.", 
+            icon: "error", 
+            iconColor: "#8B0000",
+            background: "#222", 
+            color: "#fff", 
+            confirmButtonColor: "#8B0000" 
+        });
         return;
     }
     if (isNaN(status)) {
-        Swal.fire({ title: "Error!", text: "Status is required.", icon: "error", background: "#222", color: "#fff", confirmButtonColor: "#dc3545" });
+        mySwalala.fire({ 
+            title: "Error!", 
+            text: "Status is required.", 
+            icon: "error", 
+            iconColor: "#8B0000",
+            background: "#222", 
+            color: "#fff", 
+            confirmButtonColor: "#8B0000" 
+        });
         return;
     }
-    
+
     // Prepare request payload
     const newRoom = { 
         floor, 
@@ -300,10 +336,11 @@ async function addRoom(event) {
         });
 
         if (response.ok) {
-            Swal.fire({
+            mySwalala.fire({
                 title: "Success!",
                 text: "Room added successfully!",
-                icon: "success"
+                icon: "success",
+                iconColor: "#006400"
             }).then(() => {
                 const modal = bootstrap.Modal.getInstance(document.getElementById('addRoomModal'));
                 modal.hide();
@@ -311,19 +348,21 @@ async function addRoom(event) {
                 fetchRooms(); // Refresh room list
             });
         } else {
-            Swal.fire({
+            mySwalala.fire({
                 title: "Failed!",
                 text: "Failed to add room.",
                 icon: "error",
+                iconColor: "#8B0000",
                 confirmButtonColor: "#dc3545"
             });
         }
     } catch (error) {
         console.error("Error adding room:", error);
-        Swal.fire({
+        mySwalala.fire({
             title: "Error!",
             text: "Something went wrong. Please try again.",
             icon: "error",
+            iconColor: "#8B0000",
             confirmButtonColor: "#dc3545"
         });
     }
@@ -345,27 +384,57 @@ async function updateRoom(event) {
 
     // If any field is invalid, show a single error message
     if (!selectedRoomId) {
-        alert("Room ID is required.");
+        mySwalala.fire({
+            title: "Error!",
+            text: "Room ID is required.",
+            icon: "error",
+            iconColor: "#8B0000"
+        });
         return;
     }
-    if (isNaN(floor) || floor < 0) {
-        alert("Floor must be a non-negative number.");
+    if (isNaN(floor) || floor <= 0) {
+        mySwalala.fire({
+            title: "Error!",
+            text: "Floor must be a non-negative number.",
+            icon: "error",
+            iconColor: "#8B0000"
+        });
         return;
     }
     if (isNaN(tenants) || tenants < 0) {
-        alert("Tenants must be a non-negative number.");
+        mySwalala.fire({
+            title: "Error!",
+            text: "Tenants must be a non-negative number.",
+            icon: "error",
+            iconColor: "#8B0000"
+        });
         return;
     }
     if (isNaN(maxRenters) || maxRenters < 1) {
-        alert("Max renters must be at least 1.");
+        mySwalala.fire({
+            title: "Error!",
+            text: "Max renters must be at least 1.",
+            icon: "error",
+            iconColor: "#8B0000"
+        });
         return;
     }
-    if (isNaN(price) || price < 0) {
-        alert("Price must be a non-negative number.");
+    if (isNaN(price) || price <= 0) {
+        mySwalala.fire({
+            title: "Error!",
+            text: "Price must be a non-negative number.",
+            icon: "error",
+            iconColor: "#8B0000"
+        });
         return;
     }
     if (isNaN(status)) {
-        alert("Status is required.");
+        mySwalala.fire({
+            title: "Error!",
+            text: "Status is required.",
+            icon: "error",
+            iconColor: "#8B0000"
+        });
         return;
     }
 
@@ -387,10 +456,11 @@ async function updateRoom(event) {
         });
     
         if (response.ok) {
-            Swal.fire({
+            mySwalala.fire({
                 title: "Success!",
                 text: "Room updated successfully!",
                 icon: "success",
+                iconColor: "#006400",
                 confirmButtonText: "OK"
             }).then(() => {
                 event.target.reset(); // Reset form fields
@@ -398,10 +468,11 @@ async function updateRoom(event) {
                 updateRoomDropdown(); // Update dropdowns dynamically
             });
         } else {
-            Swal.fire({
+            mySwalala.fire({
                 title: "Error!",
                 text: "Failed to update room.",
                 icon: "error",
+                iconColor: "#8B0000",
                 confirmButtonText: "OK"
             });
         }
@@ -410,10 +481,11 @@ async function updateRoom(event) {
         fetchRooms();
         } catch (error) {
             console.error("Error updating room:", error);
-            Swal.fire({
+            mySwalala.fire({
                 title: "Error!",
                 text: "An unexpected error occurred.",
                 icon: "error",
+                iconColor: "#8B0000",
                 confirmButtonText: "OK"
             });
         }
@@ -423,35 +495,80 @@ async function updateRoom(event) {
 // Delete Room
 async function deleteRoom(roomId) {
     if (!roomId) {
-        alert("Please enter a valid Room ID!");
+        mySwalala.fire({
+            title: "Error!",
+            text: "Please enter a valid Room ID!",
+            icon: "error",
+            iconColor: "#8B0000",
+            background: "#222",
+            color: "#fff",
+            confirmButtonColor: "#8B0000"
+        });
         return;
     }
 
-    // Confirm deletion
-    const confirmDeletion = confirm("Are you sure you want to delete this room?");
-    if (!confirmDeletion) {
-        return;
-    }
+    // Confirm deletion using Swal
+    const result = await mySwalala.fire({
+        title: "Are you sure?",
+        text: `Do you really want to delete Room ${roomId}?`,
+        icon: "warning",
+        iconColor: "#8B0000",
+        background: "#222",
+        color: "#fff",
+        showCancelButton: true,
+        confirmButtonColor: "#8B0000",
+        cancelButtonColor: "#6c757d",
+        confirmButtonText: "Yes, delete it!",
+        cancelButtonText: "Cancel"
+    });
+
+    if (!result.isConfirmed) return; // Stop if user cancels
 
     try {
         const response = await fetch(`/deleteRoom/${roomId}`, { method: "DELETE" });
 
         if (!response.ok) {
-            const errorData = await response.json(); // Parse JSON error response
-            alert(errorData.error); // Show user-friendly message
-            return false; // Prevent further execution
+            const errorData = await response.json(); 
+            mySwalala.fire({
+                title: "Error!",
+                text: errorData.error,
+                icon: "error",
+                iconColor: "#8B0000",
+                background: "#222",
+                color: "#fff",
+                confirmButtonColor: "#8B0000"
+            });
+            return false;
         }
 
-        alert(`Room ${roomId} deleted successfully!`);
+        mySwalala.fire({
+            title: "Deleted!",
+            text: `Room ${roomId} has been successfully deleted.`,
+            icon: "success",
+            iconColor: "#006400",
+            background: "#222",
+            color: "#fff",
+            confirmButtonColor: "#006400"
+        });
 
-        // Close modal and refresh room list
-        document.getElementById("deleteRoomModal").style.display = "none";
+        // Reset input field
+        document.getElementById("roomIdDelete").value = "";
+
+        // Refresh room list
         fetchRooms();
 
         return true;
     } catch (error) {
         console.error("Error deleting room:", error);
-        alert("An unexpected error occurred while deleting the room.");
+        mySwalala.fire({
+            title: "Error!",
+            text: "An unexpected error occurred while deleting the room.",
+            icon: "error",
+            iconColor: "#8B0000",
+            background: "#222",
+            color: "#fff",
+            confirmButtonColor: "#8B0000"
+        });
         return false;
     }
 }

@@ -110,18 +110,17 @@ app.post("/addRoom", async (req, res) => {
 app.delete("/deleteRoom/:id", async (req, res) => {
     const roomId = req.params.id;
     try {
-        // For procedures with OUT parameters, we need to use a different approach
-        const [result] = await db.query(
-            `SET @success = FALSE; 
-             SET @message = '';
-             CALL DeleteRoom(?, @success, @message);
-             SELECT @success AS success, @message AS message;`,
-            [roomId]
-        );
-        
-        // The result from the SELECT statement will be in the last result set
-        const { success, message } = result[result.length - 1][0];
-        
+        // Set success and message variables
+        await db.query("SET @success = FALSE;");
+        await db.query("SET @message = '';");
+
+        // Call the stored procedure
+        await db.query("CALL DeleteRoom(?, @success, @message);", [roomId]);
+
+        // Retrieve output values
+        const [result] = await db.query("SELECT @success AS success, @message AS message;");
+        const { success, message } = result[0];
+
         if (success) {
             res.json({ message });
         } else {
