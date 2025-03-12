@@ -163,7 +163,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const addRoomForm = document.getElementById('addRoomForm');
     addRoomForm.addEventListener('submit', addRoom);
 
-    const updateRoomForm = document.getElementById('updateRoomForm');
+    const updateRoomForm = document.getElementById('updateRoomsForm');
     updateRoomForm.addEventListener('submit', updateRoom);
 
     const deleteRoomForm = document.getElementById('deleteRoomForm');
@@ -636,18 +636,16 @@ document.addEventListener('DOMContentLoaded', function() {
 // Check Rooms
 async function fetchRooms() {
     try {
-        const response = await fetch('/rooms');
+        const response = await fetch('/rooms'); // Fetch all rooms
         const rooms = await response.json();
-  
-        // Make sure at least one room exists
-        if (rooms.length > 0) {
-            document.getElementsByClassName('requests-bar')[0].value = 
-                `Room ${rooms[0].Room_ID} - ₱${rooms[0].Room_Price.toLocaleString()}`;
-        }
+        console.log("Fetched rooms:", rooms);
+        return rooms; // Return the fetched rooms
     } catch (error) {
         console.error("Error fetching rooms:", error);
+        return []; // Return an empty array if there's an error
     }
-  }
+}
+
 
 
 // Payment Function
