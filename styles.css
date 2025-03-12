@@ -493,6 +493,16 @@ h2 {
     transition: 0.3s;
 }
 
+#dismissTenantFormContainer {
+    display: none;
+    width: 90%;
+    margin: auto;
+    background: #222;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+}
+
 /* Room Form Styling */
 #roomsFormContainer {
     display: none;
