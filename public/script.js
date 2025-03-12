@@ -184,11 +184,16 @@ document.addEventListener('DOMContentLoaded', function() {
     const deleteRoomForm = document.getElementById('deleteRoomForm');
     deleteRoomForm.addEventListener('submit', async function(event) {
         event.preventDefault();
-        const roomId = document.getElementById("roomIdDelete").value;
-        const success = await deleteRoom(roomId);
+        const selectedRoomId = this.querySelector('.roomId').value; // Get the correct dropdown inside this form
+        
+        if (!selectedRoomId) {
+            mySwalala.fire({ title: "Error!", text: "Please select a room.", icon: "error", iconColor: "#8B0000" });
+            return;
+        }
+
+        const success = await deleteRoom(selectedRoomId);
         
         if (success) {
-            // Only reset if deletion was successful
             const modal = bootstrap.Modal.getInstance(document.getElementById('deleteRoomModal'));
             modal.hide();
             this.reset();
@@ -196,7 +201,6 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    
 });
 
 
@@ -500,8 +504,6 @@ async function deleteRoom(roomId) {
             text: "Please enter a valid Room ID!",
             icon: "error",
             iconColor: "#8B0000",
-            background: "#222",
-            color: "#fff",
             confirmButtonColor: "#8B0000"
         });
         return;
@@ -513,8 +515,6 @@ async function deleteRoom(roomId) {
         text: `Do you really want to delete Room ${roomId}?`,
         icon: "warning",
         iconColor: "#8B0000",
-        background: "#222",
-        color: "#fff",
         showCancelButton: true,
         confirmButtonColor: "#8B0000",
         cancelButtonColor: "#6c757d",
@@ -534,8 +534,6 @@ async function deleteRoom(roomId) {
                 text: errorData.error,
                 icon: "error",
                 iconColor: "#8B0000",
-                background: "#222",
-                color: "#fff",
                 confirmButtonColor: "#8B0000"
             });
             return false;
@@ -546,13 +544,8 @@ async function deleteRoom(roomId) {
             text: `Room ${roomId} has been successfully deleted.`,
             icon: "success",
             iconColor: "#006400",
-            background: "#222",
-            color: "#fff",
             confirmButtonColor: "#006400"
         });
-
-        // Reset input field
-        document.getElementById("roomIdDelete").value = "";
 
         // Refresh room list
         fetchRooms();
@@ -565,8 +558,6 @@ async function deleteRoom(roomId) {
             text: "An unexpected error occurred while deleting the room.",
             icon: "error",
             iconColor: "#8B0000",
-            background: "#222",
-            color: "#fff",
             confirmButtonColor: "#8B0000"
         });
         return false;
@@ -597,6 +588,7 @@ async function populateRoomTable(rooms) {
 async function viewAllRooms(rooms) {
     const tbody = document.getElementById('allRoomsTable').querySelector('tbody');
     tbody.innerHTML = '';  // Clear existing table data
+
     rooms.forEach(room => {
         const row = document.createElement('tr');
         row.innerHTML = `
@@ -610,6 +602,22 @@ async function viewAllRooms(rooms) {
         `;
         tbody.appendChild(row);
     });
+
+    // **Destroy existing DataTable instance if it exists (important!)**
+    if ($.fn.DataTable.isDataTable('#allRoomsTable')) {
+        $('#allRoomsTable').DataTable().destroy();
+    }
+
+    // **Reinitialize DataTables**
+    $('#allRoomsTable').DataTable({
+        scrollX: true,  
+        autoWidth: false, 
+        responsive: true, 
+        "pageLength": 10,
+        "lengthMenu": [10, 25, 50, 100],
+    });
+
+    
 }
 // End of View All Rooms Function
 

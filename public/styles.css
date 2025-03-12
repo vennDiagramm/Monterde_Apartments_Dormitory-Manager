@@ -510,7 +510,7 @@ h2 {
 #roomsFormContainer {
     display: none;
     width: 90%;
-    max-height: 80vh; /* Adjust this based on your layout */
+    max-height: 80vh;
     margin: auto;
     background: #222;
     padding: 20px;
@@ -519,6 +519,7 @@ h2 {
     overflow-y: auto; /* Enables scrolling */
     scrollbar-width: thin; /* Makes scrollbar visible */
     -ms-overflow-style: auto; /* Fix for IE/Edge */
+    position: relative;
 }
 
 #roomsFormContainer::-webkit-scrollbar {
@@ -578,6 +579,33 @@ h2 {
 #roomsFormContainer button[type="submit"]:hover {
     background: #0056b3;
 }
+
+/*For the table and datatables.js */
+#allRoomsTable {
+    width: 100%;
+    max-width: 90vw;
+    table-layout: auto;
+}
+
+#viewRoomsModa_wrapper {
+    margin: 0 auto;
+}
+
+#viewRoomsModal .modal-dialog {
+    width: 80vw !important;
+    max-width: 80vw !important; 
+    margin: 0; 
+    position: absolute; 
+    left: 58.5%;  
+    top: 50%;  
+    transform: translate(-50%, -50%); 
+}
+
+#viewRoomsModal .modal-body {
+    overflow-x: auto;
+}
+
+
 
 /* Edit Tenant Form Styling */
 #editTenantFormContainer {

@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Monterde Apartments</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css"> <!-- my icons in drop down of room hehe -->
     <link rel="stylesheet" href="styles.css">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -436,8 +437,10 @@
                                 <div class="modal-body">
                                     <form id="deleteRoomForm">
                                         <div class="mb-3">
-                                            <label for="roomIdDelete" class="form-label">Room ID</label>
-                                            <input type="number" id="roomIdDelete" class="form-control" required>
+                                            <label for="roomId" class="form-label">Room ID</label>
+                                            <select class="roomId form-select" required>
+                                                <option value="">Select a Room</option>
+                                            </select>
                                         </div>
                                         <div class="text-center">
                                             <button type="submit" class="btn btn-danger">Delete Room</button>
@@ -531,7 +534,9 @@
 
     </div>
 
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="script.js"></script>
 </body>
