@@ -106,7 +106,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const editTenantBtn = document.getElementById("editTenantBtn");
 
     // Dismiss Tenant Form
-    const dismissTenentBtn = document.getElementById("dismissTenentBtn");
+    const dismissTenentBtn = document.getElementById("dismissTenantBtn");
     const dismissTenantFormContainer = document.getElementById("dismissTenantFormContainer");
 
     if (dismissTenentBtn && mainContentArea && dismissTenantFormContainer) {
