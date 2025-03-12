@@ -438,7 +438,6 @@ h2 {
 #addTenantForm button {
     width: 12vw;
     padding: 1.5vh;
-    background: #007bff;
     border: none;
     color: white;
     font-size: 1.2vw;
@@ -463,6 +462,38 @@ h2 {
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
 }
 
+/* Input Fields */
+#dismissTenantFormContainer input,
+#dismissTenantFormContainer select {
+    width: 100%;
+    padding: 0.5rem;
+    background: #333;
+    border: 1px solid #444;
+    color: #fff;
+    border-radius: 0.75rem;
+    transition: 0.3s;
+}
+
+#dismissTenantFormContainer input:focus,
+#dismissTenantFormContainer select:focus {
+    outline: none;
+    border-color: #777;
+    box-shadow: 0 0 0.5rem rgba(255, 255, 255, 0.2);
+}
+
+/* Submit Button */
+#dismissTenantFormContainer button {
+    width: 12vw;
+    padding: 1.5vh;
+    border: none;
+    color: white;
+    font-size: 1.2vw;
+    border-radius: 1vw;
+    cursor: pointer;
+    transition: 0.3s;
+}
+
+/* Room Form Styling */
 #roomsFormContainer {
     display: none;
     width: 90%;
@@ -520,6 +551,19 @@ h2 {
 
 #roomsFormContainer button[type="submit"]:hover {
     background: #0056b3;
+}
+
+/* Edit Tenant Form Styling */
+#editTenantFormContainer {
+    display: none;
+    width: 70vw; 
+    min-width: 40vw; 
+    height: fit-content;
+    margin: 5vh auto; 
+    background: #222;
+    padding: 5vh; 
+    border-radius: 2vw; 
+    box-shadow: 0px 4px 5vh rgba(0, 0, 0, 0.5); 
 }
 
 /* Search Tenant Form Styling */

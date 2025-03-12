@@ -104,6 +104,15 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Edit Tenant
     const editTenantBtn = document.getElementById("editTenantBtn");
+    const editTenantFormContainer = document.getElementById("editTenantFormContainer");
+
+    if(editTenantBtn && mainContentArea && editTenantFormContainer){
+        editTenantBtn.addEventListener("click", function(){
+            mainContentArea.innerHTML="";
+            editTenantFormContainer.style.display="block";
+            mainContentArea.appendChild(editTenantFormContainer);
+        })
+    }
 
     // Dismiss Tenant Form
     const dismissTenentBtn = document.getElementById("dismissTenantBtn");
