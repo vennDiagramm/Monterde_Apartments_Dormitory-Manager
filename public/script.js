@@ -1,3 +1,11 @@
+/* SWALLL */
+Swal.mixin({
+    background: "#222",
+    color: "#fff",
+    confirmButtonColor: "#007bff" // Bootstrap blue
+});
+
+
 // Update time and date
 async function updateDateTime() {
     const now = new Date();
@@ -55,6 +63,7 @@ async function changeApartment(locationName, slideIndex) {
 document.addEventListener('DOMContentLoaded', function() {
     // Update time and date
     updateDateTime();
+    fetchRooms() // just to load
     
     // Setup click handlers for apartment locations in dropdown
     const dropdownItems = document.querySelectorAll('.dropdown-menu .dropdown-item');
@@ -99,6 +108,9 @@ document.addEventListener('DOMContentLoaded', function() {
             mainContentArea.innerHTML = "";
             addTenantFormContainer.style.display = "block";
             mainContentArea.appendChild(addTenantFormContainer);
+
+            // for drop downs || NOTES: For add and remove(dismiss), we need to make it fetch dynamically.
+            updateRoomDropdown();
         });
     }
 
@@ -135,6 +147,9 @@ document.addEventListener('DOMContentLoaded', function() {
             mainContentArea.innerHTML ="";
             roomsFormContainer.style.display = "block";
             mainContentArea.appendChild(roomsFormContainer);
+
+            // for drop downs
+            updateRoomDropdown();
         })
     }
 
@@ -226,7 +241,7 @@ async function removeTenant(event) {
 // Add Room
 async function addRoom(event) {
     event.preventDefault();
-    // const roomsModal = document.getElementById('addRoomModal');
+
     const floor = parseInt(document.getElementById("roomFloorAdd").value, 10);
     const maxRenters = parseInt(document.getElementById("maxRentersAdd").value, 10);
     const price = parseFloat(document.getElementById("roomPriceAdd").value);
@@ -234,43 +249,40 @@ async function addRoom(event) {
     let number_of_Renters = 0;
     
     // Get the apartment name
-    const apartmentName = await getCurrentApartment();
-    
-    // Map apartments to their Apt_Loc_ID
-    const apartmentMap = {
-        "Matina Apartment": 1,
-        "Sesame Apartment": 2,
-        "Nabua Apartment": 3
-    };
-    
-    // Get the ID from the map
-    const apt_loc = apartmentMap[apartmentName];
+    const apt_loc = await getCurrentApartment();
     
     // Validate apartment ID
     if (!apt_loc) {
-        alert("Invalid apartment location.");
+        Swal.fire({
+            title: "Error!",
+            text: "Invalid apartment location.",
+            icon: "error",
+            background: "#222",
+            color: "#fff",
+            confirmButtonColor: "#dc3545"
+        });
         return;
     }
     
     // Validate input fields
     if (isNaN(floor) || floor < 0) {
-        alert("Floor must be a non-negative number.");
+        Swal.fire({ title: "Error!", text: "Floor must be a non-negative number.", icon: "error", background: "#222", color: "#fff", confirmButtonColor: "#dc3545" });
         return;
     }
     if (isNaN(maxRenters) || maxRenters < 1) {
-        alert("Max renters must be at least 1.");
+        Swal.fire({ title: "Error!", text: "Max renters must be at least 1.", icon: "error", background: "#222", color: "#fff", confirmButtonColor: "#dc3545" });
         return;
     }
     if (isNaN(price) || price < 0) {
-        alert("Price must be a non-negative number.");
+        Swal.fire({ title: "Error!", text: "Price must be a non-negative number.", icon: "error", background: "#222", color: "#fff", confirmButtonColor: "#dc3545" });
         return;
     }
     if (isNaN(status)) {
-        alert("Status is required.");
+        Swal.fire({ title: "Error!", text: "Status is required.", icon: "error", background: "#222", color: "#fff", confirmButtonColor: "#dc3545" });
         return;
     }
     
-    // Prepare request payload with correct parameter names
+    // Prepare request payload
     const newRoom = { 
         floor, 
         tenants: number_of_Renters, 
@@ -288,16 +300,32 @@ async function addRoom(event) {
         });
 
         if (response.ok) {
-            alert("Room added successfully!");
-            closeModal('addRoomModal');
-            event.target.reset();
+            Swal.fire({
+                title: "Success!",
+                text: "Room added successfully!",
+                icon: "success"
+            }).then(() => {
+                const modal = bootstrap.Modal.getInstance(document.getElementById('addRoomModal'));
+                modal.hide();
+                event.target.reset();
+                fetchRooms(); // Refresh room list
+            });
         } else {
-            alert("Failed to add room.");
+            Swal.fire({
+                title: "Failed!",
+                text: "Failed to add room.",
+                icon: "error",
+                confirmButtonColor: "#dc3545"
+            });
         }
-        
-        fetchRooms(); // Refresh rooms to update the display
     } catch (error) {
         console.error("Error adding room:", error);
+        Swal.fire({
+            title: "Error!",
+            text: "Something went wrong. Please try again.",
+            icon: "error",
+            confirmButtonColor: "#dc3545"
+        });
     }
 }
 // End of Add Room Function
@@ -306,8 +334,7 @@ async function addRoom(event) {
 async function updateRoom(event) {
     event.preventDefault();
     // IF IN the rooms modal || Change
-    const roomsModal = document.getElementById('roomsModal');
-    const selectedRoomId = roomsModal.querySelector('.roomId').value;
+    const selectedRoomId = document.querySelector('.roomId').value;
     const floor = parseInt(document.getElementById("roomFloor").value, 10);
     const tenants = parseInt(document.getElementById("numTenants").value, 10);
     const maxRenters = parseInt(document.getElementById("maxRenters").value, 10);
@@ -358,20 +385,38 @@ async function updateRoom(event) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(updatedRoom)
         });
-
+    
         if (response.ok) {
-            alert("Room updated successfully!");
-            closeModal('roomsModal');
-            event.target.reset();
+            Swal.fire({
+                title: "Success!",
+                text: "Room updated successfully!",
+                icon: "success",
+                confirmButtonText: "OK"
+            }).then(() => {
+                event.target.reset(); // Reset form fields
+                fetchRooms(); // Refresh the available rooms
+                updateRoomDropdown(); // Update dropdowns dynamically
+            });
         } else {
-            alert("Failed to update room.");
+            Swal.fire({
+                title: "Error!",
+                text: "Failed to update room.",
+                icon: "error",
+                confirmButtonText: "OK"
+            });
         }
-
+    
         // Refresh rooms to update the display
         fetchRooms();
-    } catch (error) {
-        console.error("Error updating room:", error);
-    }
+        } catch (error) {
+            console.error("Error updating room:", error);
+            Swal.fire({
+                title: "Error!",
+                text: "An unexpected error occurred.",
+                icon: "error",
+                confirmButtonText: "OK"
+            });
+        }
 }
 // End of Update Room Details Function
 
@@ -470,11 +515,14 @@ viewRooms.addEventListener("click", async function() {
 
 // Update room dropdown based on selected apartment
 async function updateRoomDropdown() {
+    const aptLocId = await getCurrentApartment(); // Get the current apartment number
+    if (!aptLocId) return; // Exit if no valid apartment ID
+
+    console.log('Current apt_ID: ', aptLocId)
+
     const roomDropdowns = document.querySelectorAll(".roomId"); // Select multiple elements
     if (roomDropdowns.length === 0) return;
 
-    const aptLocId = await getCurrentApartment(); // Get the current apartment number
-    if (!aptLocId) return; // Exit if no valid apartment ID
 
     roomDropdowns.forEach(dropdown => {
         dropdown.innerHTML = ""; // Clear existing options
