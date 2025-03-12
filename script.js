@@ -498,16 +498,19 @@ document.addEventListener('DOMContentLoaded', function() {
     const mainContentArea = document.getElementById("mainContentArea");
     const searchTenantFormContainer = document.getElementById("searchTenantFormContainer");
     const searchForm = document.getElementById("searchTenantForm");
-    const resultsBody = document.getElementById("tenantResultsBody");
+    
+    // Flag to track if the search interface has been initialized
+    let searchInterfaceInitialized = false;
     
     // Search Tenant Button Click
     if (searchTenantBtn && mainContentArea && searchTenantFormContainer) {
       searchTenantBtn.addEventListener("click", function() {
-        // Clear main content area
-        mainContentArea.innerHTML = "";
-        
-        // Create the search results container if it doesn't exist yet
-        if (!document.getElementById("searchResultsContainer")) {
+        // Only create the search interface once
+        if (!searchInterfaceInitialized) {
+          // Clear main content area
+          mainContentArea.innerHTML = "";
+          
+          // Create the search results container
           const resultsContainer = document.createElement("div");
           resultsContainer.id = "searchResultsContainer";
           resultsContainer.className = "mt-4";
@@ -534,17 +537,35 @@ document.addEventListener('DOMContentLoaded', function() {
             </div>
           `;
           
-          // Append both form and results container
+          // Make form visible and add the results container
           searchTenantFormContainer.style.display = "block";
           searchTenantFormContainer.insertBefore(resultsContainer, searchTenantFormContainer.firstChild);
+          
+          // Add to main content area
+          mainContentArea.appendChild(searchTenantFormContainer);
+          
+          // Set flag to indicate search interface is initialized
+          searchInterfaceInitialized = true;
+        } else {
+          // Just show the form container if it's already been created
+          searchTenantFormContainer.style.display = "block";
+          
+          // Make sure it's in the main content area
+          if (!mainContentArea.contains(searchTenantFormContainer)) {
+            mainContentArea.innerHTML = "";
+            mainContentArea.appendChild(searchTenantFormContainer);
+          }
+          
+          // Clear previous search results
+          const resultsBody = document.getElementById("tenantResultsBody");
+          if (resultsBody) {
+            resultsBody.innerHTML = '';
+          }
         }
-        
-        // Add to main content area
-        mainContentArea.appendChild(searchTenantFormContainer);
       });
     }
     
-    // Form submission
+    // Rest of the code remains the same
     if (searchForm) {
       searchForm.addEventListener("submit", function(e) {
         e.preventDefault();
@@ -571,7 +592,7 @@ document.addEventListener('DOMContentLoaded', function() {
           }
         ];
         
-        // Get reference to results body again (might have been recreated)
+        // Get reference to results body
         const resultsBody = document.getElementById("tenantResultsBody");
         if (resultsBody) {
           // Clear previous results
@@ -625,6 +646,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const mainContentArea = document.getElementById("mainContentArea");
     const paymentTenantFormContainer = document.getElementById("paymentTenantFormContainer");
     const resultsContainerId = "paymentResultsContainer";
+    const paymentForm = document.getElementById("paymentForm"); // Make sure this element exists
 
     // Ensure the payment results container and table exist
     function ensureResultsContainer() {
@@ -683,80 +705,52 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Populate table when page loads
-    populateTable();
-
     // Payment Tenant Button Click
     if (paymentTenantBtn && mainContentArea && paymentTenantFormContainer) {
         paymentTenantBtn.addEventListener("click", function () {
             // Clear main content area
             mainContentArea.innerHTML = "";
-
-            // Create the payment results container if it doesn't exist yet
-            if (!document.getElementById("paymentResultsContainer")) {
-                const resultsContainer = document.createElement("div");
-                resultsContainer.id = "paymentResultsContainer";
-                resultsContainer.className = "mt-4";
-                resultsContainer.innerHTML = `
-                    <h2>Payment Tenant</h2>
-                    <div class="table-responsive">
-                        <table class="table table-dark table-striped table-hover">
-                            <thead>
-                                <tr>
-                                    <th>Room ID</th>
-                                    <th>Name</th>
-                                    <th>Rent Status</th>
-                                </tr>
-                            </thead>
-                            <tbody id="tenantResultsBody">
-                                <!-- Initially empty -->
-                            </tbody>
-                        </table>
-                    </div>
-                `;
-
-                // Append both form and results container
-                paymentTenantFormContainer.style.display = "block";
-                paymentTenantFormContainer.insertBefore(resultsContainer, paymentTenantFormContainer.firstChild);
-            }
-
+            
+            // Hide payment form container initially
+            paymentTenantFormContainer.style.display = "none";
+            
             // Add to main content area
             mainContentArea.appendChild(paymentTenantFormContainer);
+            
+            // Now show it and populate the table
+            paymentTenantFormContainer.style.display = "block";
+            populateTable();
         });
     }
 
     // Form submission
-    paymentForm.addEventListener("submit", function (e) {
-        e.preventDefault();
+    if (paymentForm) {
+        paymentForm.addEventListener("submit", function (e) {
+            e.preventDefault();
 
-        // Sample data - would come from your backend in a real app
-        const sampleTenants = [
-            { id: 'T001', name: 'John Doe', rentStatus: 'Paid' },
-            { id: 'T002', name: 'Jane Doe', rentStatus: 'Not yet Paid' }
-        ];
+            // Get reference to results body again (might have been recreated)
+            const resultsBody = document.getElementById("tenantResultsBody");
 
-        // Get reference to results body again (might have been recreated)
-        const resultsBody = document.getElementById("tenantResultsBody");
+            if (resultsBody) {
+                // Clear previous results
+                resultsBody.innerHTML = '';
 
-        if (resultsBody) {
-            // Clear previous results
-            resultsBody.innerHTML = '';
-
-            // Populate table with results
-            sampleTenants.forEach(tenant => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${tenant.id}</td>
-                    <td>${tenant.name}</td>
-                    <td>${tenant.rentStatus}</td>
-                    <td>
-                        <button class="action-btn" title="View Details"><i class="bi bi-eye"></i></button>
-                        <button class="action-btn" title="Edit"><i class="bi bi-pencil"></i></button>
-                    </td>
-                `;
-                resultsBody.appendChild(row);
-            });
-        }
-    });
+                // Populate table with results
+                sampleTenants.forEach(tenant => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${tenant.id}</td>
+                        <td>${tenant.name}</td>
+                        <td>${tenant.rent}</td>
+                        <td>
+                            <button class="action-btn" title="View Details"><i class="bi bi-eye"></i></button>
+                            <button class="action-btn" title="Edit"><i class="bi bi-pencil"></i></button>
+                        </td>
+                    `;
+                    resultsBody.appendChild(row);
+                });
+            }
+        });
+    }
 });
 // End of Payment Function
