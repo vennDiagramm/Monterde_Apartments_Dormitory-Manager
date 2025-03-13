@@ -137,6 +137,11 @@ document.addEventListener('DOMContentLoaded', function() {
             mainContentArea.appendChild(dismissTenantFormContainer);
         });
     }
+    dismissTenentBtn.addEventListener("click", async function () {
+        const response = await fetch('/getTenantInfo') // For the table in dismiss
+        const tenant = await response.json();
+        viewTenantInfo(tenant);
+    })
 
     //Room Management
     const roomsBtn = document.getElementById("roomsBtn");
@@ -163,12 +168,26 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
 
-    // Payment
-    const paymentBtn = document.getElementById("paymentBtn");
-
     //Reports
     const reportBtn = document.getElementById("reportBtn");
+    const reportsFormContainer = document.getElementById("reportsFormContainer")
 
+    if (reportBtn && mainContentArea && reportsFormContainer){
+        reportBtn.addEventListener("click",function(){
+            mainContentArea.innerHTML ="";
+            reportsFormContainer.style.display = "block";
+            mainContentArea.appendChild(reportsFormContainer);
+        })
+    }
+    reportBtn.addEventListener("click", async function () {
+        const responseTenant = await fetch('/getAllContracts') // For tenant summary report
+        const contractsTenant = await responseTenant.json();
+        viewTenantReport(contractsTenant);
+
+        const responseRoom = await fetch('/getRoomsReport'); // For room summary report
+        const contractsRoom = await responseRoom.json();
+        viewRoomReport(contractsRoom);
+    })
 
     /* ---- OTHER FUNCTIONALITIES ---- */
     // Form Submissions
@@ -244,6 +263,28 @@ async function removeTenant(event) {
     }
 }
 // End of Remove a Tenant Function
+
+// Table in dismiss Tenant
+async function viewTenantInfo(tenants) {
+    const tbody = document.getElementById('tenantInfoTable').querySelector('tbody');
+    tbody.innerHTML = '';  // Clear existing table data
+    tenants.forEach(tenant => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${tenant["Tenant ID"]}</td>
+            <td>${tenant["First Name"]}</td>
+            <td>${tenant["Last Name"]}</td>
+            <td>${tenant["Sex"]}</td>
+            <td>${tenant["Date of Birth"]}</td>
+            <td>${tenant["Contact Number"]}</td>
+            <td>${tenant["Room Number"]}</td>
+            <td>${tenant["Apartment Location"]}</td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+// End of Populate room with details
+
 
 // Add Room
 async function addRoom(event) {
@@ -935,3 +976,81 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 // End of Payment Function
+
+/**     REPORTS SECTION          */
+// Report For Tenant Summary Report
+async function viewTenantReport(contracts) {
+    const tbody = document.getElementById('tenantReportTable').querySelector('tbody');
+    tbody.innerHTML = '';  // Clear existing table data
+
+    contracts.forEach(contract => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${contract["Contract Status"]}</td>
+            <td>${contract["First Name"]}</td>
+            <td>${contract["Last Name"]}</td>
+            <td>${contract["Contact Number"]}</td>
+            <td>${contract["Date of Birth"]}</td>
+            <td>${contract["Sex"]}</td>
+            <td>${contract["Apartment Location"]}</td>
+            <td>₱${contract["Room Price"].toLocaleString()}</td>
+            <td>₱${contract["Electricity Bill"].toLocaleString()}</td>
+            <td>₱${contract["Water Bill"].toLocaleString()}</td>
+            <td>₱${contract["Other Charges"].toLocaleString()}</td>
+            <td>₱${contract["Total Bill"].toLocaleString()}</td>
+            <td>₱${contract["Balance"].toLocaleString()}</td>
+            <td>${contract["Contract Date"]}</td>
+            <td>₱${contract["Payment Amount"].toLocaleString()}</td>
+        `;
+        tbody.appendChild(row);
+    });
+
+    // **Destroy existing DataTable instance if it exists (important!)**
+    if ($.fn.DataTable.isDataTable('#tenantReportTable')) {
+        $('#tenantReportTable').DataTable().destroy();
+    }
+
+    // **Reinitialize DataTables**
+    $('#tenantReportTable').DataTable({
+        scrollX: true,  
+        autoWidth: false, 
+        responsive: true, 
+        "pageLength": 10,
+        "lengthMenu": [10, 20, 30, 50, 100],
+    });
+}
+
+// Report For Room Summary Report
+async function viewRoomReport(contracts) {
+    const tbody = document.getElementById('roomReportTable').querySelector('tbody');
+    tbody.innerHTML = '';  // Clear existing table data
+
+    contracts.forEach(contract => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${contract["Room Number"]}</td>
+            <td>${contract["Floor"]}</td>
+            <td>${contract["Current Tenants"]}</td>
+            <td>${contract["Max Capacity"]}</td>
+            <td>${contract["Occupancy Rate"].toLocaleString()}</td>
+            <td>₱${contract["Monthly Rent"].toLocaleString()}</td>
+            <td>${contract["Location"]}</td>
+            <td>${contract["Status"]}</td>
+        `;
+        tbody.appendChild(row);
+    });
+
+    // **Destroy existing DataTable instance if it exists (important!)**
+    if ($.fn.DataTable.isDataTable('#roomReportTable')) {
+        $('#roomReportTable').DataTable().destroy();
+    }
+
+    // **Reinitialize DataTables**
+    $('#roomReportTable').DataTable({
+        scrollX: true,  
+        autoWidth: false, 
+        responsive: true, 
+        "pageLength": 10,
+        "lengthMenu": [10, 20, 30, 50, 100],
+    });
+}

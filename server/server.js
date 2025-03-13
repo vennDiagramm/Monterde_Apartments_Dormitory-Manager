@@ -256,19 +256,6 @@ app.post('/add-person', async (req, res) => {
     }
 });
 
-
-// Dismiss tenant table
-app.get('/viewTenantInfo', async (req, res) => {
-    try {
-        const [rows] = await db.query('GetTenantInformation()');
-        res.json(rows[0]); // Note: Results are in the first element of the returned array
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ error: "Database error" });
-    }
-});
-
-
 // Remove Tenant Route
 app.delete('/remove-tenant/:personId', async (req, res) => {
     const connection = await db.getConnection();
@@ -474,7 +461,7 @@ app.get('/calculate-electric-bill', async (req, res) => {
     }
 });
 
-// Get tenant information
+// Dismiss tenant table
 app.get('/getTenantInfo', async (req, res) => {
     try {
         const [rows] = await db.query('CALL GetTenantInformation()');
