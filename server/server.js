@@ -700,6 +700,7 @@ app.get('/search-tenant/:userInput', async (req, res) => {
         if (rows.length === 0) {
             return res.status(404).json({ message: "No matching person found" });
         }
+        console.log("ARE THERE TENANTS FOUND")
         res.json(rows);
     } catch (error) {
         console.error(`Error searching tenant for input:`, error);

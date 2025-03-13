@@ -753,6 +753,96 @@ async function updateRoomDropdown() {
 }
 // End of Update room dropdown based on selected apartment
 
+// Send the current apartment
+document.addEventListener('DOMContentLoaded', function() {
+    // Setup click handlers for apartment locations in dropdown
+    const dropdownItems = document.querySelectorAll('.dropdown-menu .dropdown-item:not(:first-child)');
+    
+    // Skip the first item which is "Landing Page"
+    dropdownItems.forEach(item => {
+        item.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            // Update dropdown button text to show selected apartment
+            const dropdownButton = document.querySelector('[aria-labelledby="dropdownMenuButton"]').previousElementSibling;
+            if (dropdownButton) {
+                dropdownButton.textContent = this.textContent;
+            }
+            
+            // Store selected apartment in localStorage for persistence
+            localStorage.setItem('currentApartment', this.textContent);
+            
+            // Send the current apartment to the server
+            sendCurrentApartment(this.textContent);
+            
+            // You might want to refresh the page content based on the selected apartment
+            // updatePageContent();
+        });
+    });
+    
+    // Function to get current apartment from localStorage or default to first apartment
+    function getApartment() {
+        const storedApartment = localStorage.getItem('currentApartment');
+        if (storedApartment) {
+            return storedApartment;
+        } else if (dropdownItems.length > 0) {
+            // Default to first apartment in the list if none is stored
+            return dropdownItems[0].textContent;
+        }
+        return ""; // Fallback if no apartments are available
+    }
+    
+    // Initialize the dropdown button with the current apartment
+    const currentApartment = getApartment();
+    const dropdownButton = document.querySelector('[aria-labelledby="dropdownMenuButton"]').previousElementSibling;
+    if (dropdownButton && currentApartment) {
+        dropdownButton.textContent = currentApartment;
+    }
+    
+    // Send the current apartment to the server when the page loads
+    if (currentApartment) {
+        sendCurrentApartment(currentApartment);
+    }
+    
+    // Function to send current apartment to the server
+    async function sendCurrentApartment(apartmentName = null) {
+        // If no apartment name is provided, get it from the current selection
+        if (!apartmentName) {
+            apartmentName = getApartment();
+        }
+        
+        // Extract just the first word of the apartment name (as in your original code)
+        const apartmentFirstWord = apartmentName.split(" ")[0];
+        
+        console.log("Sending apartment to server:", apartmentFirstWord);
+        
+        try {
+            const response = await fetch("http://localhost:3000/set-current-apartment", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ apartment: apartmentFirstWord }),
+            });
+            
+            if (!response.ok) {
+                throw new Error("Failed to send current apartment.");
+            }
+            
+            console.log(`Current apartment (${apartmentFirstWord}) sent successfully.`);
+            
+            // Return true to indicate success
+            return true;
+        } catch (error) {
+            console.error("Error sending current apartment:", error);
+            return false;
+        }
+    }
+    
+    // Make getApartment available globally if needed
+    window.getApartment = getApartment;
+});
+
+// // Call this function when the page loads
+// window.onload = sendCurrentApartment;
 
 // Search Function
 document.addEventListener('DOMContentLoaded', function() {
@@ -784,11 +874,12 @@ document.addEventListener('DOMContentLoaded', function() {
                   <tr>
                     <th>ID</th>
                     <th>Name</th>
-                    <th>Room</th>
                     <th>Contact</th>
+                    <th>Sex</th>
+                    <th>Room</th>
+                    <th>Address</th>
+                    <th>Location</th>
                     <th>Move-in Date</th>
-                    <th>Contract End</th>
-                    <th>Status</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -827,61 +918,125 @@ document.addEventListener('DOMContentLoaded', function() {
       });
     }
     
-    // Rest of the code remains the same
+    // Search form submission handler
     if (searchForm) {
-      searchForm.addEventListener("submit", function(e) {
+      searchForm.addEventListener("submit", async function(e) {
         e.preventDefault();
-        
-        // Sample data - would come from your backend in a real app
-        const sampleTenants = [
-          {
-            id: 'T001',
-            name: 'John Doe',
-            room: '101',
-            contact: '555-1234',
-            moveInDate: '2024-01-15',
-            contractEnd: '2025-01-14',
-            status: 'Active'
-          },
-          {
-            id: 'T002',
-            name: 'Jane Smith',
-            room: '202',
-            contact: '555-5678',
-            moveInDate: '2023-11-01',
-            contractEnd: '2024-10-31',
-            status: 'Active'
-          }
-        ];
+        console.log("MAY THIS WORKD")
+        // Get search input from the form
+        const userInput = document.getElementById("userInput").value.trim();
+        console.log("THE USER INPUT:", userInput)
+        if (!userInput) {
+          alert("Please enter a search term");
+          return;
+        }
         
         // Get reference to results body
         const resultsBody = document.getElementById("tenantResultsBody");
-        if (resultsBody) {
-          // Clear previous results
+        if (!resultsBody) return;
+        
+        // Clear previous results
+        resultsBody.innerHTML = '';
+        
+        try {
+          // Show loading indicator
+          resultsBody.innerHTML = '<tr><td colspan="9" class="text-center">Loading...</td></tr>';
+          
+          // Send search request to backend
+          const response = await fetch(`http://localhost:3000/search-tenant/${userInput}`);
+          
+          if (response.status === 404) {
+            resultsBody.innerHTML = '<tr><td colspan="9" class="text-center">No tenant found!</td></tr>';
+            return;
+          }
+          
+          if (!response.ok) {
+            throw new Error('Search request failed');
+          }
+          
+          const tenants = await response.json();
+          
+          // Clear loading message
           resultsBody.innerHTML = '';
           
+          if (tenants.length === 0) {
+            resultsBody.innerHTML = '<tr><td colspan="9" class="text-center">No tenant found!</td></tr>';
+            return;
+          }
+          
+          // Check if tenant belongs to current apartment
+          
+          const currentApartment = getCurrentApartment(); // Assuming this function exists
+        //   const filteredTenants = tenants.filter(tenant => 
+        //     tenant.apt_location.split(" ")[0] === currentApartment.split(" ")[0]
+        //   );
+          
+        //   if (filteredTenants.length === 0) {
+        //     resultsBody.innerHTML = '<tr><td colspan="9" class="text-center">Tenant not found in this apartment.</td></tr>';
+        //     return;
+        //   }
+          
+          // Use filteredTenants instead of tenants in the forEach below
+          
           // Populate table with results
-          sampleTenants.forEach(tenant => {
+          tenants.forEach(tenant => {
+            // Format address
+            const address = [
+              tenant.Person_Street || "",
+              tenant.Brgy_Name || "",
+              tenant.City_Name || ""
+            ].filter(Boolean).join(", ");
+            
+            // Format move-in date
+            const moveInDate = tenant.actual_move_in_date !== '0000-00-00' 
+              ? new Date(tenant.actual_move_in_date).toLocaleDateString() 
+              : 'Not available';
+            
             const row = document.createElement('tr');
             row.innerHTML = `
-              <td>${tenant.id}</td>
-              <td>${tenant.name}</td>
-              <td>${tenant.room}</td>
-              <td>${tenant.contact}</td>
-              <td>${tenant.moveInDate}</td>
-              <td>${tenant.contractEnd}</td>
-              <td><span class="badge bg-success">${tenant.status}</span></td>
+              <td>${tenant.Person_ID || "N/A"}</td>
+              <td>${tenant.FullName || "N/A"}</td>
+              <td>${tenant.Person_Contact || "N/A"}</td>
+              <td>${tenant.Person_sex || "N/A"}</td>
+              <td>${tenant.room_id || "N/A"}</td>
+              <td>${address || "N/A"}</td>
+              <td>${tenant.apt_location || "N/A"}</td>
+              <td>${moveInDate}</td>
               <td>
-                <button class="action-btn" title="View Details"><i class="bi bi-eye"></i></button>
-                <button class="action-btn" title="Edit"><i class="bi bi-pencil"></i></button>
+                <button class="action-btn view-tenant" data-id="${tenant.Person_ID}" title="View Details">
+                  <i class="bi bi-eye"></i>
+                </button>
+                <button class="action-btn edit-tenant" data-id="${tenant.Person_ID}" title="Edit">
+                  <i class="bi bi-pencil"></i>
+                </button>
               </td>
             `;
             resultsBody.appendChild(row);
           });
+          
+          // Add event listeners to the action buttons
+          setupActionButtons();
+          
+        } catch (error) {
+          console.error("Error searching tenant:", error);
+          resultsBody.innerHTML = '<tr><td colspan="9" class="text-center text-danger">Error searching for tenant. Please try again.</td></tr>';
         }
       });
     }
-  });
+    
+    // Function to set up action buttons
+    function setupActionButtons() {
+      // View tenant details
+      document.querySelectorAll('.view-tenant').forEach(button => {
+        button.addEventListener('click', function() {
+          const tenantId = this.getAttribute('data-id');
+          // Implementation for viewing tenant details
+          console.log(`View tenant ${tenantId}`);
+          // You can implement logic to show tenant details in a modal or redirect to details page
+        });
+      });
+    }
+});
 // End of Search Function
 
 
