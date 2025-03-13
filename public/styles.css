@@ -652,17 +652,15 @@ h2 {
 }
 
 /* Search Tenant Form Styling */
-#searchTenantFormContainer { 
-    display: none;
-    width: 70vw; 
-    min-width: 40vw; 
-    height: fit-content;
-    margin: 5vh auto; 
-    background: #222;
-    padding: 5vh; 
-    border-radius: 2vw; 
-    box-shadow: 0px 4px 5vh rgba(0, 0, 0, 0.5); 
+#searchTenantFormContainer {
+    max-height: 90vh; /* Adjust as needed */
+    min-width: 70vw;
+    width: 100%;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    -ms-overflow-style: auto;
 }
+
 
 #searchTenantForm { 
     display: grid;
@@ -671,6 +669,15 @@ h2 {
     width: 100%;
     padding-left: 2vw;
     height: max-content;
+}
+
+#searchTenantFormContainer::-webkit-scrollbar {
+    width: 8px;
+}
+
+#searchTenantFormContainer::-webkit-scrollbar-thumb {
+    background-color: #444;
+    border-radius: 4px;
 }
 
 #searchTenantForm label { 
@@ -710,18 +717,6 @@ h2 {
 }
 
 /* Submit Button */
-#searchTenantForm button { 
-    width: 12vw;
-    padding: 1.5vh;
-    background: #007bff;
-    border: none;
-    color: white;
-    font-size: 1.2vw;
-    border-radius: 1vw;
-    cursor: pointer;
-    transition: 0.3s;
-}
-
 #searchTenantForm button:hover { 
     background: #0056b3;
 }

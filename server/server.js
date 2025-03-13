@@ -473,7 +473,16 @@ app.post("/set-current-apartment", (req, res) => {
 
 // Function to get the stored apartment
 function getCurrentApartmentFromServer() {
-    return currentApartment;
+    switch (currentApartment) {
+        case "1":
+            return "Matina Crossing";
+        case "2":
+            return "Sesame Street";
+        case "3":
+            return "Nabua Street";
+        default:
+            return "Sesame Street"; // Default to Sesame
+    }
 }
 
 // Search Function
@@ -486,14 +495,7 @@ app.get('/search-tenant/:userInput', async (req, res) => {
         let nameParts = searchInput.split(/\s+/); // Split input by spaces
         let apartment = getCurrentApartmentFromServer() // Extract first word
         
-        if (apartment === "Matina") {
-            apartment = "Matina Crossing";
-        } else if (apartment === "Sesame") {
-            apartment = "Sesame Street";
-        } else if (apartment === "Nabua") {
-            apartment = "Nabua Street";
-        }
-        
+        console.log(apartment);
         console.log("Apartment (First Word):", apartment);
         console.log("User Input:", userInput);
         console.log("Name Parts:", nameParts);
