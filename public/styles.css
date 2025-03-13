@@ -853,3 +853,14 @@ h2 {
     max-width: 1000px;
     margin: 0 auto;
 }
+
+.chart-container.age-chart {
+    width: 100%;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+#ageDistributionChart {
+    width: 100% !important; 
+    height: auto !important; 
+}

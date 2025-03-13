@@ -180,7 +180,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
     }
     reportBtn.addEventListener("click", async function () {
-        createRoomOccupancyChart(); // create chart
+        initializeReports(); // All charts...
 
         const responseTenant = await fetch('/getAllContracts') // For tenant summary report
         const contractsTenant = await responseTenant.json();
@@ -1057,7 +1057,7 @@ async function viewRoomReport(contracts) {
     });
 }
 
-// Function to fetch room occupancy data
+// get room occupancy data
 async function fetchRoomOccupancyData() {
     fetchRooms();
     const response = await fetch('/getRoomsReport');
@@ -1065,7 +1065,7 @@ async function fetchRoomOccupancyData() {
     return data;
 }
 
-// Function to create the chart
+// Create the chart
 async function createRoomOccupancyChart() {
     const roomData = await fetchRoomOccupancyData();
     
@@ -1115,10 +1115,112 @@ async function createRoomOccupancyChart() {
 
 // Helper function for random colors
 function getRandomColor() {
-    const letters = '0123456789ABCDEF';
-    let color = '#';
-    for (let i = 0; i < 6; i++) {
-        color += letters[Math.floor(Math.random() * 16)];
-    }
-    return color;
+    const r = Math.floor(Math.random() * 156) + 100; // 100-255 (Avoids dark reds)
+    const g = Math.floor(Math.random() * 156) + 100; // 100-255 (Avoids dark greens)
+    const b = Math.floor(Math.random() * 156) + 100; // 100-255 (Avoids dark blues)
+
+    return `rgb(${r}, ${g}, ${b})`; // Returns an RGB color string
+}
+
+// Get the year
+async function fetchRevenueData(year) {
+    const response = await fetch(`/monthly-revenue/${year}`);
+    const data = await response.json();
+    return data;
+}
+
+// Revenue chart
+async function createRevenueChart() {
+    const year = new Date().getFullYear();
+    const revenueData = await fetchRevenueData(year);
+
+    const labels = revenueData.map(item => item.month);
+    const revenueValues = revenueData.map(item => parseFloat(item.revenue)); 
+
+
+    const ctx = document.getElementById('revenueChart').getContext('2d');
+    const chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Monthly Revenue',
+                data: revenueValues,
+                borderColor: 'rgba(75, 192, 192, 1)',
+                backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                borderWidth: 2,
+                fill: true
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: `Monthly Revenue (${year})`
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Revenue (₱)'
+                    }
+                }
+            }
+        }
+    });
+}
+
+
+// Get the age distri
+async function fetchAgeDistributionData() {
+    const response = await fetch('/age-distribution');
+    const data = await response.json();
+    
+    return data;
+}
+
+// Age distribution chart
+async function createAgeDistributionChart() {
+    const ageData = await fetchAgeDistributionData();
+
+    const labels = ageData.map(item => item.age_group);
+    const values = ageData.map(item => item.tenant_count);
+
+    const ctx = document.getElementById('ageDistributionChart').getContext('2d');
+    const chart = new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Tenant Age Distribution',
+                data: values,
+                backgroundColor: ['#ff6384', '#36a2eb', '#ffce56', '#4bc0c0', '#9966ff', '#ff9f40'],
+                hoverOffset: 5
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Tenant Age Distribution'
+                }
+            }
+        }
+    });
+}
+
+// Just call this para dili isa2
+async function initializeReports() {
+    // Initialize revenue chart with current year
+    createRevenueChart();
+    
+    // Initialize occupancy chart
+    createRoomOccupancyChart();
+    
+    // Initialize age distribution chart
+    createAgeDistributionChart();
 }

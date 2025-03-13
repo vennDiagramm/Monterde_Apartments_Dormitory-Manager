@@ -745,7 +745,7 @@ app.get('/getRoomsReport', async (req, res) => {
 });
 
 // Chart for revenue
-app.get('/monthly-revenue', async (req, res) => {
+app.get('/monthly-revenue/:year', async (req, res) => {
     try {
         const year = req.query.year || new Date().getFullYear();
         const [results] = await db.query('CALL GetMonthlyRoomRevenue(?)', [year]);
