@@ -180,6 +180,8 @@ document.addEventListener('DOMContentLoaded', function() {
         })
     }
     reportBtn.addEventListener("click", async function () {
+        createRoomOccupancyChart(); // create chart
+
         const responseTenant = await fetch('/getAllContracts') // For tenant summary report
         const contractsTenant = await responseTenant.json();
         viewTenantReport(contractsTenant);
@@ -1053,4 +1055,70 @@ async function viewRoomReport(contracts) {
         "pageLength": 10,
         "lengthMenu": [10, 20, 30, 50, 100],
     });
+}
+
+// Function to fetch room occupancy data
+async function fetchRoomOccupancyData() {
+    fetchRooms();
+    const response = await fetch('/getRoomsReport');
+    const data = await response.json();
+    return data;
+}
+
+// Function to create the chart
+async function createRoomOccupancyChart() {
+    const roomData = await fetchRoomOccupancyData();
+    
+    // Process data for Chart.js
+    const locations = [...new Set(roomData.map(room => room.Location))];
+    const datasets = locations.map(location => {
+        const locationRooms = roomData.filter(room => room.Location === location);
+        return {
+            label: location,
+            data: locationRooms.map(room => room['Occupancy Rate'].replace('%', '')),
+            backgroundColor: getRandomColor()
+        };
+    });
+    
+    // Create chart
+    const ctx = document.getElementById('roomOccupancyChart').getContext('2d');
+    const chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: roomData.map(room => `Room ${room['Room Number']}`),
+            datasets: datasets
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'Room Occupancy by Location'
+                },
+                legend: {
+                    position: 'top',
+                },
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    title: {
+                        display: true,
+                        text: 'Occupancy Rate (%)'
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Helper function for random colors
+function getRandomColor() {
+    const letters = '0123456789ABCDEF';
+    let color = '#';
+    for (let i = 0; i < 6; i++) {
+        color += letters[Math.floor(Math.random() * 16)];
+    }
+    return color;
 }

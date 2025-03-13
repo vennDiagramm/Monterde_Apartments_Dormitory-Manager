@@ -847,3 +847,9 @@ h2 {
     white-space: nowrap; 
     text-align: center;
 }
+
+.chart-container {
+    width: 80%;
+    max-width: 1000px;
+    margin: 0 auto;
+}

@@ -744,6 +744,29 @@ app.get('/getRoomsReport', async (req, res) => {
     }
 });
 
+// Chart for revenue
+app.get('/monthly-revenue', async (req, res) => {
+    try {
+        const year = req.query.year || new Date().getFullYear();
+        const [results] = await db.query('CALL GetMonthlyRoomRevenue(?)', [year]);
+        res.json(results[0]);
+    } catch (error) {
+        console.error('Error fetching monthly revenue:', error);
+        res.status(500).json({ error: 'Failed to fetch monthly revenue data' });
+    }
+});
+
+// chart for tenant age distribution
+app.get('/age-distribution', async (req, res) => {
+    try {
+        const [results] = await db.query('CALL GetTenantAgeDistribution()');
+        res.json(results[0]);
+    } catch (error) {
+        console.error('Error fetching age distribution:', error);
+        res.status(500).json({ error: 'Failed to fetch age distribution data' });
+    }
+});
+
 // 🔹 Start the Server
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
