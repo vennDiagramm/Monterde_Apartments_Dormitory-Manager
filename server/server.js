@@ -722,6 +722,28 @@ app.get('/search-tenant/:userInput', async (req, res) => {
     }    
 });
 
+// Reports
+// Tenant Report
+app.get('/getAllContracts', async (req, res) => {
+    try {
+        const [results] = await db.query('CALL GetAllContracts(NULL)');
+        res.json(results[0]);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Database error" });
+    }
+});
+
+// Room Report
+app.get('/getRoomsReport', async (req, res) => {
+    try {
+        const [results] = await db.query('CALL GetRoomsWithOccupancyStatus()');
+        res.json(results[0]);
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ error: "Database error" });
+    }
+});
 
 // 🔹 Start the Server
 app.listen(port, () => {
