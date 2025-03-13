@@ -156,7 +156,7 @@ app.post('/add-person', async (req, res) => {
             city,
             region,
             roomId,
-            apartmentLocation // Apartment Location from the active slide
+            aptLocID // Apartment Location from the active slide
         } = req.body;
 
         // Insert person information
@@ -217,18 +217,6 @@ app.post('/add-person', async (req, res) => {
             [roomId]
         );
         
-        let aptLocID;
-
-        if (apartmentLocation.startsWith("Matina")) {
-            aptLocID = 1;
-        } else if (apartmentLocation.startsWith("Sesame")) {
-            aptLocID = 2;
-        } else if (apartmentLocation.startsWith("Nabua")) {
-            aptLocID = 3;
-        } else {
-            await connection.rollback();
-            return res.status(400).json({ error: "Invalid apartment location" });
-        }
         
         // Insert Contract into `contract` table
         await connection.query(

@@ -193,6 +193,9 @@ document.addEventListener('DOMContentLoaded', function() {
 
     /* ---- OTHER FUNCTIONALITIES ---- */
     // Form Submissions
+    const addTenantForm = document.getElementById('addTenantForm');
+    addTenantForm.addEventListener('submit', addTenant);
+
     const removeTenantForm = document.getElementById("removeTenantForm");
     removeTenantForm.addEventListener('submit', removeTenant);
 
@@ -224,6 +227,101 @@ document.addEventListener('DOMContentLoaded', function() {
 
 });
 
+// Add a Tenant
+async function addTenant(event) {
+    event.preventDefault();
+    try {
+        // Gather form data
+        const firstName = document.getElementById('firstName').value;
+        const middleName = document.getElementById('middleName').value;
+        const lastName = document.getElementById('lastName').value;
+        const contact = document.getElementById('contact').value;
+        const dob = document.getElementById('dob').value;
+        const sex = document.getElementById('sex').value;
+  
+        // City and Address fields
+        const city = document.getElementById('city').value;
+        const region = document.getElementById('region').value;
+        const barangay = document.getElementById('barangay').value;
+        const street = document.getElementById('street').value;
+  
+        // Get the active apartment location
+        let aptLocID =  await getCurrentApartment();
+  
+        // Room ID (sen)
+        const roomId = document.querySelector('.roomId').value;
+  
+        // Validate inputs
+        if (!firstName || !lastName || !contact || !dob || !sex || 
+            !city || !region || !barangay || !street || !roomId || !aptLocID) {
+            mySwalala.fire({ 
+                title: "Error!", 
+                text: "Please fill in all required fields!", 
+                icon: "error", 
+                iconColor: "#8B0000",
+                background: "#222", 
+                color: "#fff", 
+                confirmButtonColor: "#8B0000" 
+            });
+            return;
+        }
+  
+        // Send data to server
+        const response = await fetch('/add-person', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                firstName,
+                middleName,
+                lastName,
+                contact,
+                dob,
+                sex,
+                city,
+                region,
+                barangay,
+                street,
+                aptLocID, 
+                roomId
+            })
+        });
+  
+        if (!response.ok) {
+            mySwalala.fire({
+                title: "Failed!",
+                text: "Failed to add tenant.",
+                icon: "error",
+                iconColor: "#8B0000",
+                confirmButtonColor: "#dc3545"
+            });
+            throw new Error("Failed to add tenant");
+        }
+        
+        mySwalala.fire({
+            title: "Success!",
+            text: "Tenant and occupant added successfully!",
+            icon: "success",
+            iconColor: "#006400"
+        }).then(() => {
+            event.target.reset(); 
+            fetchRooms(); 
+            updateRoomDropdown(); 
+        });
+        
+        } catch (error) {
+            console.error("Error adding tenant:", error);
+            mySwalala.fire({
+                title: "Error!",
+                text: "Failed to complete tenant registration. " + error.message,
+                icon: "error",
+                iconColor: "#8B0000",
+                confirmButtonColor: "#dc3545"
+            });
+        }        
+  }
+// End of Add a Tenant Function
 
 // Remove a Tenant
 async function removeTenant(event) {
@@ -315,56 +413,29 @@ async function addRoom(event) {
         return;
     }
     
-    // Validate input fields
-    if (isNaN(floor) || floor <= 0) {
-        mySwalala.fire({ 
-            title: "Error!", 
-            text: "Floor must be a non-negative number.", 
-            icon: "error", 
-            iconColor: "#8B0000",
-            background: "#222", 
-            color: "#fff", 
-            confirmButtonColor: "#8B0000" 
-        });
-        return;
-    }
-    if (isNaN(maxRenters) || maxRenters < 1) {
-        mySwalala.fire({ 
-            title: "Error!", 
-            text: "Max renters must be at least 1.", 
-            icon: "error", 
-            iconColor: "#8B0000",
-            background: "#222", 
-            color: "#fff", 
-            confirmButtonColor: "#8B0000" 
-        });
-        return;
-    }
-    if (isNaN(price) || price <= 0) {
-        mySwalala.fire({ 
-            title: "Error!", 
-            text: "Price must be a non-negative number.", 
-            icon: "error", 
-            iconColor: "#8B0000",
-            background: "#222", 
-            color: "#fff", 
-            confirmButtonColor: "#8B0000" 
-        });
-        return;
-    }
-    if (isNaN(status)) {
-        mySwalala.fire({ 
-            title: "Error!", 
-            text: "Status is required.", 
-            icon: "error", 
-            iconColor: "#8B0000",
-            background: "#222", 
-            color: "#fff", 
-            confirmButtonColor: "#8B0000" 
-        });
-        return;
-    }
+   // Validate input fields
+    if (isNaN(floor) || floor <= 0 || isNaN(maxRenters) || maxRenters < 1 || 
+    isNaN(price) || price <= 0 || isNaN(status)) {
+    let errorMsg = "";
 
+    if (isNaN(floor) || floor <= 0) errorMsg = "Floor must be a non-negative number.";
+    else if (isNaN(maxRenters) || maxRenters < 1) errorMsg = "Max renters must be at least 1.";
+    else if (isNaN(price) || price <= 0) errorMsg = "Price must be a non-negative number.";
+    else if (isNaN(status)) errorMsg = "Status is required.";
+
+    mySwalala.fire({ 
+        title: "Error!", 
+        text: errorMsg, 
+        icon: "error", 
+        iconColor: "#8B0000",
+        background: "#222", 
+        color: "#fff", 
+        confirmButtonColor: "#8B0000" 
+    });
+
+    return;
+    }
+    
     // Prepare request payload
     const newRoom = { 
         floor, 
@@ -429,60 +500,25 @@ async function updateRoom(event) {
 
     console.log("Selected status:", status); // Debugging log
 
-    // If any field is invalid, show a single error message
-    if (!selectedRoomId) {
-        mySwalala.fire({
-            title: "Error!",
-            text: "Room ID is required.",
-            icon: "error",
-            iconColor: "#8B0000"
-        });
-        return;
-    }
-    if (isNaN(floor) || floor <= 0) {
-        mySwalala.fire({
-            title: "Error!",
-            text: "Floor must be a non-negative number.",
-            icon: "error",
-            iconColor: "#8B0000"
-        });
-        return;
-    }
-    if (isNaN(tenants) || tenants < 0) {
-        mySwalala.fire({
-            title: "Error!",
-            text: "Tenants must be a non-negative number.",
-            icon: "error",
-            iconColor: "#8B0000"
-        });
-        return;
-    }
-    if (isNaN(maxRenters) || maxRenters < 1) {
-        mySwalala.fire({
-            title: "Error!",
-            text: "Max renters must be at least 1.",
-            icon: "error",
-            iconColor: "#8B0000"
-        });
-        return;
-    }
-    if (isNaN(price) || price <= 0) {
-        mySwalala.fire({
-            title: "Error!",
-            text: "Price must be a non-negative number.",
-            icon: "error",
-            iconColor: "#8B0000"
-        });
-        return;
-    }
-    if (isNaN(status)) {
-        mySwalala.fire({
-            title: "Error!",
-            text: "Status is required.",
-            icon: "error",
-            iconColor: "#8B0000"
-        });
-        return;
+    // Validate input fields
+    if (!selectedRoomId || isNaN(floor) || floor <= 0 || isNaN(tenants) || tenants < 0 || 
+    isNaN(maxRenters) || maxRenters < 1 || isNaN(price) || price <= 0 || isNaN(status)) {
+
+    let errorMsg = !selectedRoomId ? "Room ID is required." :
+                isNaN(floor) || floor <= 0 ? "Floor must be a non-negative number." :
+                isNaN(tenants) || tenants < 0 ? "Tenants must be a non-negative number." :
+                isNaN(maxRenters) || maxRenters < 1 ? "Max renters must be at least 1." :
+                isNaN(price) || price <= 0 ? "Price must be a non-negative number." :
+                "Status is required.";
+
+    mySwalala.fire({
+        title: "Error!",
+        text: errorMsg,
+        icon: "error",
+        iconColor: "#8B0000"
+    });
+
+    return;
     }
 
     // Gather validated values
@@ -510,9 +546,9 @@ async function updateRoom(event) {
                 iconColor: "#006400",
                 confirmButtonText: "OK"
             }).then(() => {
-                event.target.reset(); // Reset form fields
-                fetchRooms(); // Refresh the available rooms
-                updateRoomDropdown(); // Update dropdowns dynamically
+                event.target.reset(); 
+                fetchRooms(); 
+                updateRoomDropdown(); 
             });
         } else {
             mySwalala.fire({
