@@ -93,20 +93,38 @@ html, body {
     height: auto;
 }
 
+/* For the mouse icon */
 .mouse-icon {
-    width: 50px; /* Adjust size */
+    width: 50px;
     height: auto;
+    display: block; 
 }
 
+/* For the scrolling dot */
 .scroll-dot {
-    width: 5px; /* Adjust size for dot */
+    width: 5px;
     height: 5px;
     background-color: white;
     border-radius: 50%;
     position: absolute;
-    top: 10px; /* Adjust position inside the mouse */
+    top: 10px;
+    left: 42%;
+    transform: translateX(-50%);
     animation: bounce 1.5s infinite ease-in-out;
-    left: 12.3px;
+}
+
+/* Mobile styles with !important to ensure they override */
+@media (max-width: 767px) {
+    .icon-container {
+        width: 30px !important; /* Force smaller container */
+    }
+    
+    .scroll-dot {
+        width: 3px !important;
+        height: 3px !important;
+        
+        left: 45% !important;
+    }
 }
 
 /* Bouncing Animation */
@@ -114,35 +132,6 @@ html, body {
     0% { transform: translateY(0); opacity: 1; }
     50% { transform: translateY(29px); opacity: 0.6; }
     100% { transform: translateY(0); opacity: 1; }
-}
-
-/* Next & previous buttons */
-.prev, .next {
-    cursor: pointer;
-    position: absolute;
-    top: 50%;
-    width: auto;
-    margin-top: -22px;
-    padding: 16px;
-    color: white;
-    font-weight: bold;
-    font-size: 18px;
-    transition: 0.6s ease;
-    border-radius: 0 3px 3px 0;
-    user-select: none;
-    z-index: 999;  /* Ensure buttons are above everything */
-    pointer-events: auto;
-}
-  
-/* Position the "next button" to the right */
-.next {
-    right: 0;
-    border-radius: 3px 0 0 3px;
-}
-  
-/* On hover, add a black background color with a little bit see-through */
-.prev:hover, .next:hover {
-    background-color: rgba(0,0,0,0.8);
 }
 
 /* Fading animation */
@@ -163,9 +152,9 @@ html, body {
     left: 50%;
     transform: translate(-50%, -50%);
     text-align: center;
-    color: white; /* Change to white if needed */
-    z-index: 19; /* Ensure it's above the slideshow */
-    width: 100%; /* Helps with centering */
+    color: white; 
+    z-index: 19; 
+    width: 100%;
     pointer-events: none
 }
 
@@ -179,7 +168,7 @@ html, body {
 
 .location-text {
     position: absolute;
-    top: -165px; /* Adjust as needed */
+    top: -165px; 
     left: 50%;
     transform: translateX(-50%);
     font-weight: bold;
@@ -508,4 +497,31 @@ html, body {
 /* Large devices (desktops, 992px and up) */
 @media (min-width: 992px) {
     /* This will maintain your original desktop styles */
+}
+
+/* Logo styling */
+.apartment-logo {
+    max-width: 180px; /* Default size for desktop */
+    height: auto;
+}
+
+/* Medium devices (tablets, 768px and up) */
+@media (min-width: 768px) and (max-width: 991.98px) {
+    .apartment-logo {
+        max-width: 150px;
+    }
+}
+
+/* Small devices (landscape phones, 576px and up) */
+@media (min-width: 576px) and (max-width: 767.98px) {
+    .apartment-logo {
+        max-width: 120px;
+    }
+}
+
+/* Extra small devices (phones, less than 576px) */
+@media (max-width: 575.98px) {
+    .apartment-logo {
+        max-width: 100px;
+    }
 }
