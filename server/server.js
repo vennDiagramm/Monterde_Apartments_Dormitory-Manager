@@ -450,9 +450,10 @@ app.get('/calculate-electric-bill', async (req, res) => {
 });
 
 // Dismiss tenant table
-app.get('/getTenantInfo', async (req, res) => {
+app.get('/getTenantInfo/:aptLocId', async (req, res) => {
     try {
-        const [rows] = await db.query('CALL GetTenantInformation()');
+        const aptLocId = req.params.aptLocId || null;
+        const [rows] = await db.query('CALL GetTenantInformation(?)', [aptLocId]);
         res.json(rows[0]); // Note: Results are in the first element of the returned array
     } catch (error) {
         console.error(error);

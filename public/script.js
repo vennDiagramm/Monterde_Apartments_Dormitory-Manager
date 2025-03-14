@@ -138,7 +138,9 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     dismissTenentBtn.addEventListener("click", async function () {
-        const response = await fetch('/getTenantInfo') // For the table in dismiss
+        const aptLocId = await getCurrentApartment();
+        if (!aptLocId) return; 
+        const response = await fetch(`/getTenantInfo/${aptLocId}`) // For the table in dismiss
         const tenant = await response.json();
         viewTenantInfo(tenant);
     })

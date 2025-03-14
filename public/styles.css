@@ -457,12 +457,27 @@ h2 {
 /* Dismiss Tenant Form Button */
 #dismissTenantFormContainer {
     display: none;
-    width: 90%;
+    max-height: 90vh;
+    min-width: 70vw;
+    width: 100%;
     margin: auto;
     background: #222;
     padding: 20px;
     border-radius: 12px;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+    overflow-y: auto; 
+    scrollbar-width: thin;
+    -ms-overflow-style: auto;
+    position: relative;
+}
+
+#dismissTenantFormContainer::-webkit-scrollbar {
+    width: 8px;
+}
+
+#dismissTenantFormContainer::-webkit-scrollbar-thumb {
+    background-color: #444;
+    border-radius: 4px;
 }
 
 /* Input Fields */
@@ -653,6 +668,7 @@ h2 {
 
 /* Search Tenant Form Styling */
 #searchTenantFormContainer {
+    display: none;
     max-height: 90vh; /* Adjust as needed */
     min-width: 70vw;
     width: 100%;
