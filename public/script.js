@@ -253,9 +253,9 @@ async function addTenant(event) {
         const street = document.getElementById('street').value;
   
         // Get the active apartment location
-        let aptLocID =  await getCurrentApartment();
+        let aptLocID = await getCurrentApartment();
   
-        // Room ID (sen)
+        // Room ID
         const roomId = document.querySelector('.roomId').value;
   
         // Validate inputs
@@ -274,7 +274,7 @@ async function addTenant(event) {
         }
   
         // Send data to server
-        const response = await fetch('/add-person', {
+        let response = await fetch('/add-person', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -295,17 +295,21 @@ async function addTenant(event) {
             })
         });
   
-        const result = await response.json();
+        let result = await response.json();
 
         if (!response.ok) {
-            mySwalala.fire({
-                title: "Failed!",
-                text: "Failed to add tenant.",
-                icon: "error",
-                iconColor: "#8B0000",
-                confirmButtonColor: "#dc3545"
-            });
             throw new Error(result.error || "Failed to add tenant");
+        }
+        
+        // After successfully adding tenant, update room status
+        response = await fetch("/updateRoomStatus");
+        let statusResult = await response.json();
+        
+        if (!response.ok) {
+            console.error("Room status update failed but tenant was added:", statusResult);
+            // Continue since the main operation (adding tenant) succeeded
+        } else {
+            console.log("Rooms updated:", statusResult);
         }
         
         mySwalala.fire({
@@ -319,17 +323,17 @@ async function addTenant(event) {
             updateRoomDropdown(); 
         });
         
-        } catch (error) {
-            console.error("Error adding tenant:", error);
-            mySwalala.fire({
-                title: "Error!",
-                text: "Failed to complete tenant registration. " + error.message,
-                icon: "error",
-                iconColor: "#8B0000",
-                confirmButtonColor: "#dc3545"
-            });
-        }        
-  }
+    } catch (error) {
+        console.error("Error adding tenant:", error);
+        mySwalala.fire({
+            title: "Error!",
+            text: "Failed to complete tenant registration. " + error.message,
+            icon: "error",
+            iconColor: "#8B0000",
+            confirmButtonColor: "#dc3545"
+        });
+    }        
+}
 // End of Add a Tenant Function
 
 // Remove a Tenant

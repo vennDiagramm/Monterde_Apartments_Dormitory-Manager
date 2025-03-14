@@ -133,6 +133,27 @@ app.delete("/deleteRoom/:id", async (req, res) => {
 });
 // End of Delete Room
 
+// Update Room Status
+app.get("/updateRoomStatus", async (req, res) => {
+    try {
+        const [result] = await db.query('CALL UpdateRoomOccupancyStatus()');
+        const roomsUpdated = result[0][0]['Rooms Updated'];
+        
+        res.json({
+            success: true,
+            message: `${roomsUpdated} rooms had their status updated`,
+            roomsUpdated: roomsUpdated
+        });
+    } catch (err) {
+        console.error("Error updating room statuses:", err);
+        res.status(500).json({ 
+            success: false,
+            error: "Failed to update room statuses",
+            details: err.message 
+        });
+    }
+});
+
 /**     -------     END OF ROOMS API SECTION      -------     **/
 
 
