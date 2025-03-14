@@ -1225,7 +1225,7 @@ async function viewRoomReport(contracts) {
         row.innerHTML = `
             <td>${contract["Room Number"]}</td>
             <td>${contract["Floor"]}</td>
-            <td>${contract["Current Tenants"]}</td>
+            <td>${contract["Current Tenant"]}</td>
             <td>${contract["Max Capacity"]}</td>
             <td>${contract["Occupancy Rate"].toLocaleString()}</td>
             <td>₱${contract["Monthly Rent"].toLocaleString()}</td>
@@ -1250,17 +1250,12 @@ async function viewRoomReport(contracts) {
     });
 }
 
-// get room occupancy data
-async function fetchRoomOccupancyData() {
-    fetchRooms();
-    const response = await fetch('/getRoomsReport');
-    const data = await response.json();
-    return data;
-}
 
 // Create the chart
 async function createRoomOccupancyChart() {
-    const roomData = await fetchRoomOccupancyData();
+    fetchRooms();
+    const response = await fetch('/getRoomsReport');
+    const roomData = await response.json();
     
     // Process data for Chart.js
     const locations = [...new Set(roomData.map(room => room.Location))];
