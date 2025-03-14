@@ -1590,14 +1590,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 const contractDetails_ID = await contractDetails_IDRes.json(); // Direct access, as the API returns the ID directly
                 const meterTotal = meterEnd - meterStart;
                 const utility = electricBill;
-                const balance = rentPrice;
-                const totalBill = balance;
+                const totalBill = await calculateMonthlyBill();
+
+                console.log("Total bill: ", totalBill);
 
 
                 const contractBillBody = {
                     Contract_Details_ID: contractDetails_ID,
                     total_bill: totalBill,
-                    Balance: rentPrice,
+                    Balance: totalBill,
                     Bill_meterEndMonth: meterEnd,
                     Bill_meterStartMonth: meterStart,
                     meter_total: meterTotal,
@@ -2037,6 +2038,8 @@ async function calculateMonthlyBill() {
         if (!roomsResponse.ok) {
             throw new Error('Failed to fetch active rooms');
         }
+
+        let totalRentFinal = 0;
         
         // Process each room
         for (const room of roomsData) {
@@ -2068,9 +2071,7 @@ async function calculateMonthlyBill() {
             
             console.log(`Room ${roomId}: Rent = ${rentPrice}, Electricity = ${(meterEnd - meterStart) * 12}, Water = ${waterBill * numRenters}`);
             console.log(`Total bill for room ${roomId}: ${totalFinalRent}`);
-            
-            // DAPAT MAG E STORE NIYA ANG RESULTS KAY CONTRACT BILL
-
+            totalRentFinal = totalFinalRent;
         }
         
         console.log("Monthly billing calculation completed successfully");
@@ -2082,6 +2083,10 @@ async function calculateMonthlyBill() {
             icon: "success",
             iconColor: "#006400"
         });
+
+        console.log(`Total bill for room ${roomId}: ${totalRentFinal}`);
+        // DAPAT MAG E STORE NIYA ANG RESULTS KAY CONTRACT BILL
+        return totalRentFinal;  // Return the total rent final
         
     } catch (error) {
         console.error("Error in monthly billing calculation:", error);
@@ -2115,4 +2120,4 @@ function setupMonthlyBilling() {
 }
 
 // Initialize the monthly billing system when the page loads
-document.addEventListener('DOMContentLoaded', setupMonthlyBilling);
+//document.addEventListener('DOMContentLoaded', setupMonthlyBilling);
