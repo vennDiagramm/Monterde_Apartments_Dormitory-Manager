@@ -93,47 +93,6 @@ html, body {
     height: auto;
 }
 
-/* For the mouse icon */
-.mouse-icon {
-    width: 50px;
-    height: auto;
-    display: block; 
-}
-
-/* For the scrolling dot */
-.scroll-dot {
-    width: 5px;
-    height: 5px;
-    background-color: white;
-    border-radius: 50%;
-    position: absolute;
-    top: 10px;
-    left: 42%;
-    transform: translateX(-50%);
-    animation: bounce 1.5s infinite ease-in-out;
-}
-
-/* Mobile styles with !important to ensure they override */
-@media (max-width: 767px) {
-    .icon-container {
-        width: 30px !important; /* Force smaller container */
-    }
-    
-    .scroll-dot {
-        width: 3px !important;
-        height: 3px !important;
-        
-        left: 45% !important;
-    }
-}
-
-/* Bouncing Animation */
-@keyframes bounce {
-    0% { transform: translateY(0); opacity: 1; }
-    50% { transform: translateY(29px); opacity: 0.6; }
-    100% { transform: translateY(0); opacity: 1; }
-}
-
 /* Fading animation */
 .fade {
     animation-name: fade;
@@ -525,3 +484,80 @@ html, body {
         max-width: 100px;
     }
 }
+
+.custom-btn {
+    text-decoration: none;
+    color: white;
+}
+.btn {
+    position: relative;
+    color: white;
+    width: 256px;
+    height: 64px;
+    /* Remove line-height and add these properties */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    transition: all 0.3s;
+    text-decoration: none;
+    font-weight: 600;
+}
+  
+  .btn::before, .btn::after {
+    content: '';
+    position: absolute;
+    transition: all 0.3s;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    text-decoration: none;
+    color: white;
+  }
+
+  .btn-two::before, .btn-two::after {
+    content: '';
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    bottom: 0;
+    left: 0;
+    z-index: 1;
+    transition: all 0.3s;
+    border: 1px solid rgba(255, 255, 255, 0.5);
+    text-decoration: none;
+    color: white;
+  }
+  
+  .btn-two:hover::after {
+    animation-name: rotatecw;
+    animation-duration: 2s;
+    text-decoration: none;
+    color: white;
+  }
+  .btn-two:hover::before {
+    animation-name: rotateccw; 
+    animation-duration: 3s;
+    text-decoration: none;
+    color: white;
+  }
+  .btn-two:hover::after, .btn-two:hover::before {
+    left: 96px;
+    width: 64px;
+    
+    animation-iteration-count: infinite;
+    animation-timing-function: linear;
+    text-decoration: none;
+    color: white;
+  }
+  
+  @keyframes rotatecw {
+      from {transform: rotate(0deg);}
+      to {transform: rotate(360deg);}
+  }
+  
+  @keyframes rotateccw {
+      from {transform: rotate(0deg);}
+      to {transform: rotate(-360deg);}
+  }
