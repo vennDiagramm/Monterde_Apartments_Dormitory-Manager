@@ -514,7 +514,8 @@ app.get('/search-tenant/:userInput', async (req, res) => {
                 SELECT 
                     pi.Person_ID, 
                     CONCAT(pi.Person_FName, ' ', COALESCE(pi.Person_MName, ''), ' ', pi.Person_LName) AS FullName, 
-                    pi.Person_Contact, 
+                    pi.Person_Contact,
+                    pi.Person_DOB, 
                     ps.sex_title AS Person_sex,
                     COALESCE(MIN(a.Person_Street), 'Unknown') AS Person_Street,  
                     COALESCE(MIN(b.Brgy_Name), 'Unknown') AS Brgy_Name, 
@@ -543,7 +544,8 @@ app.get('/search-tenant/:userInput', async (req, res) => {
                 SELECT 
                     pi.Person_ID, 
                     CONCAT(pi.Person_FName, ' ', COALESCE(pi.Person_MName, ''), ' ', pi.Person_LName) AS FullName, 
-                    pi.Person_Contact, 
+                    pi.Person_Contact,
+                    pi.Person_DOB,
                     ps.sex_title AS Person_sex,
                     COALESCE(MIN(a.Person_Street), 'Unknown') AS Person_Street,  
                     COALESCE(MIN(b.Brgy_Name), 'Unknown') AS Brgy_Name, 
@@ -573,7 +575,8 @@ app.get('/search-tenant/:userInput', async (req, res) => {
                     SELECT 
                         pi.Person_ID, 
                         CONCAT(pi.Person_FName, ' ', COALESCE(pi.Person_MName, ''), ' ', pi.Person_LName) AS FullName, 
-                        pi.Person_Contact, 
+                        pi.Person_Contact,
+                        pi.Person_DOB, 
                         ps.sex_title AS Person_sex,
                         COALESCE(MIN(a.Person_Street), 'Unknown') AS Person_Street,  
                         COALESCE(MIN(b.Brgy_Name), 'Unknown') AS Brgy_Name, 
@@ -603,7 +606,8 @@ app.get('/search-tenant/:userInput', async (req, res) => {
                     SELECT 
                         pi.Person_ID, 
                         CONCAT(pi.Person_FName, ' ', COALESCE(pi.Person_MName, ''), ' ', pi.Person_LName) AS FullName, 
-                        pi.Person_Contact, 
+                        pi.Person_Contact,
+                        pi.Person_DOB,
                         ps.sex_title AS Person_sex,
                         COALESCE(MIN(a.Person_Street), 'Unknown') AS Person_Street,  
                         COALESCE(MIN(b.Brgy_Name), 'Unknown') AS Brgy_Name, 
@@ -636,7 +640,8 @@ app.get('/search-tenant/:userInput', async (req, res) => {
                         SELECT 
                             pi.Person_ID, 
                             CONCAT(pi.Person_FName, ' ', COALESCE(pi.Person_MName, ''), ' ', pi.Person_LName) AS FullName, 
-                            pi.Person_Contact, 
+                            pi.Person_Contact,
+                            pi.Person_DOB,
                             ps.sex_title AS Person_sex,
                             COALESCE(MIN(a.Person_Street), 'Unknown') AS Person_Street,  
                             COALESCE(MIN(b.Brgy_Name), 'Unknown') AS Brgy_Name, 
@@ -666,7 +671,8 @@ app.get('/search-tenant/:userInput', async (req, res) => {
                         SELECT 
                             pi.Person_ID, 
                             CONCAT(pi.Person_FName, ' ', COALESCE(pi.Person_MName, ''), ' ', pi.Person_LName) AS FullName, 
-                            pi.Person_Contact, 
+                            pi.Person_Contact,
+                            pi.Person_DOB,
                             ps.sex_title AS Person_sex,
                             COALESCE(MIN(a.Person_Street), 'Unknown') AS Person_Street,  
                             COALESCE(MIN(b.Brgy_Name), 'Unknown') AS Brgy_Name, 

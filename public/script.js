@@ -843,6 +843,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     <th>ID</th>
                     <th>Name</th>
                     <th>Contact</th>
+                    <th>Date of Birth</th>
                     <th>Sex</th>
                     <th>Room</th>
                     <th>Address</th>
@@ -974,12 +975,17 @@ document.addEventListener('DOMContentLoaded', function() {
             const moveInDate = tenant.actual_move_in_date !== '0000-00-00' 
               ? new Date(tenant.actual_move_in_date).toLocaleDateString() 
               : 'Not available';
+
+            const birthDay = tenant.Person_DOB !== '0000-00-00' 
+            ? new Date(tenant.actual_move_in_date).toLocaleDateString() 
+            : 'Not available';
             
             const row = document.createElement('tr');
             row.innerHTML = `
               <td>${tenant.Person_ID || "N/A"}</td>
               <td>${tenant.FullName || "N/A"}</td>
               <td>${tenant.Person_Contact || "N/A"}</td>
+              <td>${birthDay || "N/A"}</td>
               <td>${tenant.Person_sex || "N/A"}</td>
               <td>${tenant.room_id || "N/A"}</td>
               <td>${address || "N/A"}</td>
