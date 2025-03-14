@@ -413,16 +413,15 @@ app.post("/process-payment", async (req, res) => {
     const remarksValue = remarks && remarks.trim() !== "" ? remarks : null;
 
     const sql = `
-        INSERT INTO Payment (Contract_Bill_ID, Date, Amount, Remarks)
+        INSERT INTO payment (Contract_Bill_ID, Date, Amount, Remarks)
         SELECT 
             cb.Contract_Bill_ID, 
             CURDATE() AS Date, 
             ? AS Amount, 
             ? AS Remarks
-        FROM Contract_Bill cb
-        JOIN Contract_Details cd ON cb.Contract_Details_ID = cd.Contract_Details_ID
-        JOIN Contract c ON c.Contract_ID = cd.Contract_Details_ID
-        WHERE c.Person_ID = ? AND cd.Room_ID = ?
+        FROM contract_bill cb
+        JOIN contract_details cd ON cb.Contract_Details_ID = cd.Contract_Details_ID
+        WHERE cd.Occupants_ID = ? AND cd.Room_ID = ?
     `;
 
     db.query(sql, [amountPaid, remarksValue, personId, roomId], (err, result) => {
@@ -460,6 +459,59 @@ app.get('/calculate-electric-bill', async (req, res) => {
     } catch (error) {
         console.error("Database error:", error);
         res.status(500).json({ error: "Server error while calculating electric bill." });
+    }
+});
+
+//Fetch other Charges 
+app.get("/get-other-charges", async (req, res) => {
+    const { roomId, personId } = req.query;
+
+    if (!roomId || !personId) {
+        return res.status(400).json({ error: "Missing roomId or occupantId" });
+    }
+
+    try {
+        const query = `
+            SELECT oc.OC_total 
+            FROM other_charges oc
+            JOIN contract_bill cb ON oc.Contract_Bill_ID = cb.Contract_Bill_ID
+            JOIN contract_details cd ON cb.Contract_Details_ID = cd.Contract_Details_ID
+            WHERE cd.Room_ID = ? AND cd.Occupants_ID = ?;
+        `;
+
+        const [rows] = await db.execute(query, [roomId, personId]);
+
+        // If no record exists, return OC_total as 0 instead of an error
+        const ocTotal = rows.length > 0 ? rows[0].OC_total : 0;
+
+        res.json({ OC_total: ocTotal }); 
+    } catch (error) {
+        console.error("Error fetching miscellaneous charges:", error);
+        res.status(500).json({ error: "Server error while retrieving miscellaneous charges." });
+    }
+});
+
+ 
+// Fetch Room Max Renters
+app.get('/get-number-of-renters', async (req, res) => {
+    const { roomId } = req.query;
+
+    if (isNaN(roomId)) {
+        return res.status(400).json({ error: "Invalid Room ID" });
+    }
+
+    try {
+        const query = `SELECT Number_of_Renters FROM room WHERE Room_ID = ?`;
+        const [rows] = await db.execute(query, [roomId]);
+
+        if (rows.length === 0) {
+            return res.status(404).json({ error: "No max renters found for this room ID" });
+        }
+
+        res.json({ numRenters: rows[0].Number_of_Renters });
+    } catch (error) {
+        console.error("Error fetching max renters:", error);
+        res.status(500).json({ error: "Server error" });
     }
 });
 

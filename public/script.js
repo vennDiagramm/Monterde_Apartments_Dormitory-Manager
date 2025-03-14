@@ -170,6 +170,7 @@ document.addEventListener('DOMContentLoaded', function() {
         populateRoomTable(rooms);
     });
 
+    //Payment
 
     //Reports
     const reportBtn = document.getElementById("reportBtn");
@@ -227,6 +228,9 @@ document.addEventListener('DOMContentLoaded', function() {
             fetchRooms();
         }
     });
+
+    //const paymentForm = document.getElementById('paymentTenantForm');
+    //paymentForm.addEventListener('submit', paymentProcess);
 
 });
 
@@ -1052,7 +1056,15 @@ document.addEventListener('DOMContentLoaded', function () {
     const mainContentArea = document.getElementById("mainContentArea");
     const paymentTenantFormContainer = document.getElementById("paymentTenantFormContainer");
     const resultsContainerId = "paymentResultsContainer";
-    const paymentForm = document.getElementById("paymentForm"); // Make sure this element exists
+    const confirmPaymentBtn = document.getElementById("confirmPaymentBtn");
+    const formRentPayment = document.getElementById("formRentPayment");
+    const formMiscPayment = document.getElementById("formMiscPayment");
+    const totalRentField = document.getElementById("total_rent");
+    const rentPaymentTotal = document.getElementById("rentPaymentTotal");
+    const miscPaymentTotal = document.getElementById("miscPaymentTotal");
+    let rentPrice = 0; //global variable for rent
+    let otherChargesPrice = 0  //global variable for other charges
+    let changeAmount = 0; //global variable for change
 
     // Ensure the payment results container and table exist
     function ensureResultsContainer() {
@@ -1129,10 +1141,74 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
-    // Form submission
-    if (paymentForm) {
-        paymentForm.addEventListener("submit", function (e) {
+    // Confirm Button click before Payment Process
+    if (confirmPaymentBtn) {
+        confirmPaymentBtn.addEventListener("click", async function () {
+            // Call getRentPrice to update total rent before submission
+            const totalRent = await getRentPrice(); // Wait for rent price to be retrieved
+            const totalUpdatedRent = await getMiscellaneousPrice();
+            
+            if (totalRent !== null && totalUpdatedRent !== null) {
+                rentPrice = totalRent;  // Store base rent price globally
+                otherChargesPrice = totalUpdatedRent; // Store updated rent with misc charges globally
+
+                // Update values in HTML
+                totalRentField.value = `₱${totalRent.toFixed(2)}`;
+                rentPaymentTotal.value = `₱${totalRent.toFixed(2)}`;
+                miscPaymentTotal.value = `₱${totalUpdatedRent.toFixed(2)}`;
+            } 
+        });
+    }
+
+    // Form submission rent payment
+    if (formRentPayment) {
+        formRentPayment.addEventListener("submit", function (e) {
             e.preventDefault();
+
+            
+            //Calls payment process
+            paymentProcess();
+
+            //Update change
+            const changeRentAmount = document.getElementById("changeRentAmount");
+            changeRentAmount.value = changeAmount
+
+            // Get reference to results body again (might have been recreated)
+            const resultsBody = document.getElementById("tenantResultsBody");
+            
+
+            if (resultsBody) {
+                // Clear previous results
+                resultsBody.innerHTML = '';
+
+                // Populate table with results
+                sampleTenants.forEach(tenant => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${tenant.id}</td>
+                        <td>${tenant.name}</td>
+                        <td>${tenant.rent}</td>
+                        <td>
+                            <button class="action-btn" title="View Details"><i class="bi bi-eye"></i></button>
+                            <button class="action-btn" title="Edit"><i class="bi bi-pencil"></i></button>
+                        </td>
+                    `;
+                    resultsBody.appendChild(row);
+                });
+            }
+        });
+    }
+    
+    // Form submission miscellaneous payment
+    if (formMiscPayment) {
+        formMiscPayment.addEventListener("submit", function (e) {
+            e.preventDefault();
+
+            //Calls Miscellaneous Payment Process
+            miscellaneousPaymentProcess();
+
+            const changeMiscAmount = document.getElementById("changeMiscAmount");
+            changeMiscAmount.value = changeAmount;
 
             // Get reference to results body again (might have been recreated)
             const resultsBody = document.getElementById("tenantResultsBody");
@@ -1158,6 +1234,192 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
+
+    // Retrieve Rent Price
+    async function getRentPrice() {
+        try {
+            let personId = Number(document.getElementById("personId").value);
+            let roomId = Number(document.getElementById("roomId").value);
+
+            // Check if valid numbers
+            if (!roomId || isNaN(roomId) || roomId <= 0) {
+                alert("Invalid Room ID.");
+                return null;
+            }
+            if (!personId || isNaN(personId) || personId <= 0) {
+                alert("Invalid Person ID.");
+                return null;
+            }
+
+            // Fetch Rent Price
+            const response = await fetch(`http://localhost:3000/get-room-price?personId=${personId}&roomId=${roomId}`);
+            if (!response.ok) throw new Error("Failed to fetch room price");
+
+            const data = await response.json();
+            let rentPrice = Number(data.rent_price); // Store rent price
+
+            // Fetch Electric Bill
+            try {
+                const meterStart = Number(document.getElementById("start_meter").value);
+                const meterEnd = Number(document.getElementById("end_meter").value);
+                let numRenters = 0; 
+                const waterBill = Number(document.getElementById("water_bill").value);
+
+                if (isNaN(meterStart) || isNaN(meterEnd)) {
+                    throw new Error("Invalid meter readings.");
+                }
+
+                // Fetch Number of Tenants
+                try {
+                    const rentersResponse = await fetch(`http://localhost:3000/get-number-of-renters?roomId=${roomId}`);
+                    if (!rentersResponse.ok) throw new Error("Failed to fetch max renters");
+
+                    const rentersData = await rentersResponse.json();
+                    numRenters = rentersData.numRenters;
+
+                } catch (error) {
+                    console.error("Error fetching number of renters:", error);
+                    Swal.fire("Error!", "Could not retrieve number of renters.", "error");
+                }
+
+                // Fetch Electric Bill
+                const electricResponse = await fetch(`http://localhost:3000/calculate-electric-bill?prev_meter=${meterStart}&current_meter=${meterEnd}&num_renters=${numRenters}`);
+                if (!electricResponse.ok) throw new Error("Failed to fetch electric bill.");
+
+                const electricData = await electricResponse.json();
+                const electricBill = Number(electricData.total_bill);
+
+                // Calculate Total Rent
+                if (waterBill !== 150) {
+                    rentPrice = rentPrice + electricBill - (150 * numRenters) + (waterBill * numRenters);
+                } else {
+  
+                    rentPrice += electricBill;
+                }
+
+            } catch (error) {
+                console.error("Error fetching electric bill:", error);
+            }
+
+            return rentPrice;
+
+        } catch (error) {
+            console.error("Error fetching rent price:", error);
+            return null;
+        }
+    }
+
+   // Fetch Other Charges / Miscellaneous
+    async function getMiscellaneousPrice() {
+        try {
+            const personId = document.getElementById("personId").value;
+            const roomId = document.getElementById("roomId").value;
+
+            if (!personId || !roomId) {
+                Swal.fire("Error!", "Person ID and Room ID are required.", "error");
+                return rentPrice; 
+            }
+
+            // Fetch OC_total (Other Charges)
+            const ocResponse = await fetch(`http://localhost:3000/get-other-charges?roomId=${roomId}&personId=${personId}`);
+            if (!ocResponse.ok) throw new Error("Failed to retrieve other charges");
+
+            const ocData = await ocResponse.json();
+            const ocTotal = ocData.OC_total || 0; // If no record exists, return 0
+
+            otherChargesPrice = ocTotal;
+
+            return otherChargesPrice;
+        } catch (error) {
+            console.error("Error fetching miscellaneous charges:", error);
+            return rentPrice; // Return rentPrice instead of 0
+        }
+    }
+
+    // Payment Process
+    async function paymentProcess(event) {
+        try {
+            const payment = parseFloat(document.getElementById("inputRentPaymentAmount").value);
+            const remarks = document.getElementById("inputRentPaymentRemarks").value;
+
+            // Checks if valid inputs
+            if (!payment || payment < rentPrice) {
+                Swal.fire("Error!", "Enter a valid amount greater than or equal to the rent price.", "error");
+                return;
+            }
+
+            // Payment change calculation
+            changeAmount = payment - rentPrice;
+
+            // Send payment data to the server
+            const response = await fetch("http://localhost:3000/process-payment", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    personId: document.getElementById("personId").value,
+                    roomId: document.getElementById("roomId").value,
+                    amountPaid: payment,
+                    date: new Date().toISOString().split("T")[0],
+                    remarks: remarks,
+                }),
+            });
+
+            if (!response.ok) throw new Error("Failed to process payment");
+
+            // Show success message
+            Swal.fire("Success!", "Payment processed successfully.", "success");
+
+        } catch (error) {
+            console.error(error);
+            Swal.fire("Error!", "Error processing payment.", "error");
+        }
+    }
+
+
+    // Miscellaneous Payment Process
+    async function miscellaneousPaymentProcess(event) {
+        try {
+            // Get payment input
+            const payment = parseFloat(document.getElementById("inputMiscPaymentAmount").value);
+            const remarks = document.getElementById("inputMiscPaymentRemarks").value;
+    
+            // **Ensure updatedRentPrice is refreshed before validation**
+            otherChargesPrice = await getMiscellaneousPrice();
+    
+            // Validate payment input
+            if (!payment || payment < otherChargesPrice) {
+                Swal.fire("Error!", "Enter a valid amount greater than or equal to the total rent including miscellaneous charges.", "error");
+                return;
+            }
+    
+            // Calculate change
+           changeAmount = payment - otherChargesPrice;
+    
+            // Send payment data to the server (removed unnecessary 'change')
+            const response = await fetch("http://localhost:3000/process-payment", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    personId: document.getElementById("personId").value,
+                    roomId: document.getElementById("roomId").value,
+                    amountPaid: payment,
+                    date: new Date().toISOString().split("T")[0],
+                    remarks: remarks,
+                }),
+            });
+    
+            if (!response.ok) throw new Error("Failed to process payment");
+    
+            Swal.fire("Success!", "Miscellaneous Payment processed successfully.", "success");
+        } catch (error) {
+            console.error(error);
+            Swal.fire("Error!", "Error processing miscellaneous payment.", "error");
+        }
+    }    
 });
 // End of Payment Function
 
