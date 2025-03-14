@@ -157,7 +157,7 @@ document.addEventListener('DOMContentLoaded', function() {
             mainContentArea.appendChild(roomsFormContainer);
 
             // for drop downs
-            updateRoomDropdown();
+            updateAllRoomDropdown()
         })
     }
 
@@ -212,7 +212,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const deleteRoomForm = document.getElementById('deleteRoomForm');
     deleteRoomForm.addEventListener('submit', async function(event) {
         event.preventDefault();
-        const selectedRoomId = this.querySelector('.roomId').value; // Get the correct dropdown inside this form
+        const selectedRoomId = this.querySelector('.allRoomId').value; // Get the correct dropdown inside this form
         
         if (!selectedRoomId) {
             mySwalala.fire({ title: "Error!", text: "Please select a room.", icon: "error", iconColor: "#8B0000" });
@@ -256,7 +256,7 @@ async function addTenant(event) {
         let aptLocID = await getCurrentApartment();
   
         // Room ID
-        const roomId = document.querySelector('.roomId').value;
+        const roomId = document.querySelector('.vacantRoomId').value;
   
         // Validate inputs
         if (!firstName || !lastName || !contact || !dob || !sex || 
@@ -504,7 +504,7 @@ async function addRoom(event) {
 async function updateRoom(event) {
     event.preventDefault();
     // IF IN the rooms modal || Change
-    const selectedRoomId = document.querySelector('.roomId').value;
+    const selectedRoomId = document.querySelector('.allRoomId').value;
     const floor = parseInt(document.getElementById("roomFloor").value, 10);
     const tenants = parseInt(document.getElementById("numTenants").value, 10);
     const maxRenters = parseInt(document.getElementById("maxRenters").value, 10);
@@ -561,7 +561,7 @@ async function updateRoom(event) {
             }).then(() => {
                 event.target.reset(); 
                 fetchRooms(); 
-                updateRoomDropdown(); 
+                updateAllRoomDropdown();
             });
         } else {
             mySwalala.fire({
@@ -737,7 +737,7 @@ async function updateRoomDropdown() {
 
     console.log('Current apt_ID: ', aptLocId)
 
-    const roomDropdowns = document.querySelectorAll(".roomId"); // Select multiple elements
+    const roomDropdowns = document.querySelectorAll(".vacantRoomId"); // Select multiple elements
     if (roomDropdowns.length === 0) return;
 
 
@@ -746,6 +746,42 @@ async function updateRoomDropdown() {
 
         // Fetch available rooms from the database
         fetch(`/getRooms/${aptLocId}`)
+            .then(response => response.json())
+            .then(data => {
+                if (data.length === 0) {
+                    let option = document.createElement("option");
+                    option.textContent = "No available rooms";
+                    dropdown.appendChild(option);
+                } else {
+                    data.forEach(room => {
+                        let option = document.createElement("option");
+                        option.value = room.Room_ID;
+                        option.textContent = `Room ${room.Room_ID}`;
+                        dropdown.appendChild(option);
+                    });
+                }
+            })
+            .catch(error => console.error("Error fetching rooms:", error));
+    });
+}
+// End of Update room dropdown based on selected apartment
+
+// Update room dropdown based on selected apartment REGARDLESS OF STATUS
+async function updateAllRoomDropdown() {
+    const aptLocId = await getCurrentApartment(); // Get the current apartment number
+    if (!aptLocId) return; // Exit if no valid apartment ID
+
+    console.log('Current apt_ID: ', aptLocId)
+
+    const roomDropdowns = document.querySelectorAll(".allRoomId"); // Select multiple elements
+    if (roomDropdowns.length === 0) return;
+
+
+    roomDropdowns.forEach(dropdown => {
+        dropdown.innerHTML = ""; // Clear existing options
+
+        // Fetch available rooms from the database
+        fetch(`/getAllRooms/${aptLocId}`)
             .then(response => response.json())
             .then(data => {
                 if (data.length === 0) {
@@ -1256,11 +1292,12 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
             // Fetch Rent Price
-            const response = await fetch(`http://localhost:3000/get-room-price?personId=${personId}&roomId=${roomId}`);
+            const response = await fetch(`/get-room-price/${roomId}`);
             if (!response.ok) throw new Error("Failed to fetch room price");
 
             const data = await response.json();
             let rentPrice = Number(data.rent_price); // Store rent price
+            console.log(rentPrice + "properly stored!")
 
             // Fetch Electric Bill
             try {
@@ -1423,7 +1460,17 @@ document.addEventListener('DOMContentLoaded', function () {
             console.error(error);
             Swal.fire("Error!", "Error processing miscellaneous payment.", "error");
         }
-    }    
+    }
+    
+    document.addEventListener("DOMContentLoaded", function () {
+        const paymentForm = document.getElementById("paymentTenantForm");
+        if (paymentForm) {
+            paymentForm.addEventListener("submit", paymentProcess);
+            console.log(sucess)
+        }
+    });
+    
+    
 });
 // End of Payment Function
 
@@ -1556,13 +1603,12 @@ async function createRoomOccupancyChart() {
     });
 }
 
-// Helper function for random colors
 function getRandomColor() {
-    const r = Math.floor(Math.random() * 156) + 100; // 100-255 (Avoids dark reds)
-    const g = Math.floor(Math.random() * 156) + 100; // 100-255 (Avoids dark greens)
-    const b = Math.floor(Math.random() * 156) + 100; // 100-255 (Avoids dark blues)
+    const hue = Math.floor(Math.random() * 360);  // Random hue (0-360 for full spectrum)
+    const saturation = 80; // High saturation for vivid colors
+    const lightness = 50;  // Medium lightness for strong contrast
 
-    return `rgb(${r}, ${g}, ${b})`; // Returns an RGB color string
+    return `hsl(${hue}, ${saturation}%, ${lightness}%)`; // Returns an HSL color string
 }
 
 // Get the year

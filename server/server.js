@@ -53,6 +53,18 @@ app.get("/getRooms/:aptLocId", async (req, res) => {
 });
 // End of Get rooms by aptLocId
 
+// Para sa dropdown sa rooms regardless of status
+app.get('/getAllRooms/:aptLocId', async (req, res) => {
+    const aptLocId = req.params.aptLocId;
+    try {
+        const [results] = await db.query('CALL GetRoomIdsByAptLocId(?)', [aptLocId]);
+        res.json(results[0]); // Note: Results are in the first element of the returned array
+    } catch (err) {
+        console.error("Error fetching rooms:", err);
+        res.status(500).json({ error: "Database error" });
+    }
+});
+
 // Get Full View of Room via aptLocId
 app.get("/getFullRoomView/:aptLocId", async (req, res) => {
     const aptLocId = req.params.aptLocId;
@@ -254,18 +266,19 @@ app.post('/add-person', async (req, res) => {
         
         
         // Insert Contract into `contract` table
-        await connection.query(
+        const [contractResult] = await connection.query(
             `INSERT INTO contract (Person_ID, Apt_Loc_ID, Date) VALUES (?, ?, CURDATE())`,
             [personId, aptLocID]
         );
-        
+        const contractId = contractResult.insertId;
+
         // Insert Contract Details
         await connection.query(
             `INSERT INTO contract_details 
-            (Room_ID, Occupants_ID, MoveIn_date, MoveOut_date, Actual_Move_In_Date, Room_Price, Down_Payment) 
-            VALUES (?, ?, CURDATE(), DATE_ADD(CURDATE(), INTERVAL 6 MONTH), CURDATE(), 
+            (Contract_Details_ID, Room_ID, Occupants_ID, MoveIn_date, MoveOut_date, Actual_Move_In_Date, Room_Price, Down_Payment) 
+            VALUES (?, ?, ?, CURDATE(), DATE_ADD(CURDATE(), INTERVAL 6 MONTH), CURDATE(), 
             (SELECT Room_Price FROM room WHERE Room_ID = ?), 0)`,
-            [roomId, occupantId, roomId]
+            [contractId, roomId, occupantId, roomId]
         );
 
         await connection.commit();
@@ -392,25 +405,24 @@ app.get('/get-person-name/:personId', async (req, res) => {
 
 //Payment route
 // Fetch Rent Price for Payment Process
-app.get('/get-room-price', async (req, res) => {
-    const { personId, roomId } = req.query;
+app.get('/get-room-price/:roomId', async (req, res) => {
+    const roomId = req.params.roomId; // Corrected parameter
 
-    if (isNaN(personId) || isNaN(roomId)) {
-        alert("Please enter valid Person ID and Room Number");
-        return;
+    if (isNaN(roomId)) {
+        return res.status(400).json({ error: "Please enter a valid Room Number" });
     }    
 
     try {
         const query = `
             SELECT Room_Price 
-            FROM contract_details 
-            WHERE Contract_Details_ID = ? AND Room_ID = ?
+            FROM room
+            WHERE Room_ID = ?;
         `;
 
-        const [rows] = await db.execute(query, [personId, roomId]);
+        const [rows] = await db.execute(query, [roomId]);
 
         if (rows.length === 0) {
-            return res.status(404).json({ error: 'No room price found for this personId or roomId' });
+            return res.status(404).json({ error: 'No room found with this Room ID' });
         }
 
         const rentPrice = rows[0]?.Room_Price || 0;
@@ -418,10 +430,8 @@ app.get('/get-room-price', async (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Server error' });
-
     }
 });
-
 // Payment Process
 app.post("/process-payment", async (req, res) => {
     const { personId, roomId, amountPaid, remarks } = req.body;
