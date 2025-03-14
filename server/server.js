@@ -159,6 +159,20 @@ app.post('/add-person', async (req, res) => {
             aptLocID // Apartment Location from the active slide
         } = req.body;
 
+        // Check if person already exists
+        const [existingPerson] = await connection.query(
+            'SELECT Person_ID FROM person_information WHERE Person_FName = ? AND Person_LName = ? AND Person_Contact = ?',
+            [firstName, lastName, contact]
+        );
+
+        if (existingPerson.length > 0) {
+            await connection.rollback();
+            return res.status(409).json({ 
+                error: "Person already exists", 
+                personId: existingPerson[0].Person_ID 
+            });
+        }
+
         // Insert person information
         const [personResult] = await connection.query(
             'INSERT INTO person_information (Person_FName, Person_MName, Person_LName, Person_Contact, Person_DOB, Person_sex) VALUES (?, ?, ?, ?, ?, ?)',

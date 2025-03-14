@@ -291,6 +291,8 @@ async function addTenant(event) {
             })
         });
   
+        const result = await response.json();
+
         if (!response.ok) {
             mySwalala.fire({
                 title: "Failed!",
@@ -299,7 +301,7 @@ async function addTenant(event) {
                 iconColor: "#8B0000",
                 confirmButtonColor: "#dc3545"
             });
-            throw new Error("Failed to add tenant");
+            throw new Error(result.error || "Failed to add tenant");
         }
         
         mySwalala.fire({
