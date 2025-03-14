@@ -45,6 +45,7 @@ async function getCurrentApartment() {
 async function changeApartment(locationName, slideIndex) {
     // Update the location text
     document.getElementById('currentLocation').textContent = locationName.toUpperCase();
+    sendApartment();
     
     // Remove active class from all slides
     const slides = document.querySelectorAll('.slide');
@@ -755,66 +756,30 @@ async function updateRoomDropdown() {
 }
 // End of Update room dropdown based on selected apartment
 
-// Send the current apartment
+
+// Search Mechanism
 document.addEventListener('DOMContentLoaded', function() {
-    // Setup click handlers for apartment locations in dropdown
-    const dropdownItems = document.querySelectorAll('.dropdown-menu .dropdown-item:not(:first-child)');
-    
-    // Skip the first item which is "Landing Page"
-    dropdownItems.forEach(item => {
-        item.addEventListener('click', function(e) {
-            e.preventDefault();
-            
-            // Update dropdown button text to show selected apartment
-            const dropdownButton = document.querySelector('[aria-labelledby="dropdownMenuButton"]').previousElementSibling;
-            if (dropdownButton) {
-                dropdownButton.textContent = this.textContent;
-            }
-            
-            // Store selected apartment in localStorage for persistence
-            localStorage.setItem('currentApartment', this.textContent);
-            
-            // Send the current apartment to the server
-            sendCurrentApartment(this.textContent);
-            
-            // You might want to refresh the page content based on the selected apartment
-            // updatePageContent();
-        });
-    });
-    
-    // Function to get current apartment from localStorage or default to first apartment
+    // Function to get current apartment from the span element
     function getApartment() {
-        const storedApartment = localStorage.getItem('currentApartment');
-        if (storedApartment) {
-            return storedApartment;
-        } else if (dropdownItems.length > 0) {
-            // Default to first apartment in the list if none is stored
-            return dropdownItems[0].textContent;
+        const locationSpan = document.getElementById('currentLocation');
+        if (locationSpan) {
+            return locationSpan.textContent.trim();
         }
-        return ""; // Fallback if no apartments are available
-    }
-    
-    // Initialize the dropdown button with the current apartment
-    const currentApartment = getApartment();
-    const dropdownButton = document.querySelector('[aria-labelledby="dropdownMenuButton"]').previousElementSibling;
-    if (dropdownButton && currentApartment) {
-        dropdownButton.textContent = currentApartment;
-    }
-    
-    // Send the current apartment to the server when the page loads
-    if (currentApartment) {
-        sendCurrentApartment(currentApartment);
+        return ""; // Fallback if element not found
     }
     
     // Function to send current apartment to the server
-    async function sendCurrentApartment(apartmentName = null) {
-        // If no apartment name is provided, get it from the current selection
-        if (!apartmentName) {
-            apartmentName = getApartment();
+    async function sendApartment() {
+        const currentApartment = getApartment();
+        
+        // Check if we have a valid apartment name
+        if (!currentApartment) {
+            console.warn("No apartment location found in the span element.");
+            return false;
         }
         
-        // Extract just the first word of the apartment name (as in your original code)
-        const apartmentFirstWord = apartmentName.split(" ")[0];
+        // Extract just the first word of the apartment name if needed
+        const apartmentFirstWord = currentApartment.split(" ")[0];
         
         console.log("Sending apartment to server:", apartmentFirstWord);
         
@@ -830,8 +795,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             
             console.log(`Current apartment (${apartmentFirstWord}) sent successfully.`);
-            
-            // Return true to indicate success
             return true;
         } catch (error) {
             console.error("Error sending current apartment:", error);
@@ -839,10 +802,13 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
     
-    // Make getApartment available globally if needed
+    // Send the current apartment to the server when the page loads
+    sendApartment();
+    
+    // Make getCurrentApartment available globally if needed
     window.getApartment = getApartment;
+    window.sendApartment = sendApartment;
 });
-
 // // Call this function when the page loads
 // window.onload = sendCurrentApartment;
 
@@ -924,7 +890,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (searchForm) {
       searchForm.addEventListener("submit", async function(e) {
         e.preventDefault();
-        console.log("MAY THIS WORKD")
         // Get search input from the form
         const userInput = document.getElementById("userInput").value.trim();
         console.log("THE USER INPUT:", userInput)
@@ -958,6 +923,22 @@ document.addEventListener('DOMContentLoaded', function() {
           
           const tenants = await response.json();
           
+          let apartmentNow = window.getApartment();
+
+          if ((tenants[0].apt_location.split(" ")[0].toLowerCase() !== apartmentNow.toLowerCase()) && userInput.toLowerCase() !== "all") {
+            mySwalala.fire({
+                title: "No Tenant Found!",
+                text: "This tenant does not exist in " + tenants[0].apt_location.split(" ")[0] + " Apartment",
+                icon: "error",
+                iconColor: "#8B0000",
+                confirmButtonColor: "#dc3545"
+            }).then(() => {
+                document.getElementById("userInput").value = ""; // Clears the input field
+            });
+            resultsBody.innerHTML = '';
+            return;
+          }
+
           // Clear loading message
           resultsBody.innerHTML = '';
           
