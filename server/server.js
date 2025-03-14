@@ -332,36 +332,244 @@ app.put('/edit-tenant/:personId', async (req, res) => {
         await connection.beginTransaction();
 
         const personIdEdit = req.params.personId;
-        const { contact, moveInDate, moveOutDate } = req.body;
+        let {
+            firstNameId,
+            middleNameId,
+            lastNameId,
+            birthdayP,
+            street,
+            barangay,
+            city,
+            contact,
+            moveIn,
+            moveOut
+        } = req.body; // Extracts data sent in the request body
         
-        // Update Person_Information table
-        const [personUpdate] = await connection.query(
-            'UPDATE person_information SET Person_Contact = ? WHERE Person_ID = ?',
-            [contact, personIdEdit]
-        );
+        if (moveIn !== undefined) {
+            moveIn = moveIn.split("T")[0];
+        }
+        
+        if (moveOut !== undefined) {
+            moveOut = moveOut.split("T")[0];
+        }
+    
+        // Track if any updates were made
+        let updatesPerformed = false;
+        
+        // Update Person_Information contact if provided
+        if (contact !== undefined) {
+            const [result] = await connection.execute(
+                'UPDATE person_information SET person_Contact = ? WHERE person_ID = ?',
+                [contact, personIdEdit]
+            );
 
-        // Retrieve the correct Contract_ID for this Person_ID
-        const [contractResult] = await connection.query(
-            'SELECT cd.Contract_Details_ID FROM contract_details cd join contract c on cd.contract_details_id = c.contract_id join person_information p on c.person_id = p.person_id WHERE p.person_id = ?',
-            [personIdEdit]
-        );
+            if (result.affectedRows === 0) {
+                throw new Error('Update failed: No rows were affected. Check if the person_ID exists.');
+            }
+        
+            updatesPerformed = true;
+        }
+        
 
-        if (contractResult.length === 0) {
-            await connection.rollback();
-            return res.status(404).json({ error: "Contract not found for this tenant." });
+        // Update Person_Information First Name if provided
+        if (firstNameId !== undefined) {
+            const [result] = await connection.query(
+            'UPDATE person_information SET person_FName = ? WHERE person_ID = ?',
+            [firstNameId, personIdEdit]
+            );
+            
+            if (result.affectedRows === 0) {
+            throw new Error('No rows were updated when changing first name');
+            }
+            
+            updatesPerformed = true;
+        }
+  
+        // Update Person_Information Middle Name if provided
+        if (middleNameId !== undefined) {
+            const [result] = await connection.query(
+            'UPDATE person_information SET person_MName = ? WHERE person_ID = ?',
+            [middleNameId, personIdEdit]
+            );
+            
+            if (result.affectedRows === 0) {
+            throw new Error('No rows were updated when changing middle name');
+            }
+            
+            updatesPerformed = true;
+        }
+        
+        // Update Person_Information Last Name if provided
+        if (lastNameId !== undefined) {
+            const [result] = await connection.query(
+            'UPDATE person_information SET person_LName = ? WHERE person_ID = ?',
+            [lastNameId, personIdEdit]
+            );
+            
+            if (result.affectedRows === 0) {
+            throw new Error('No rows were updated when changing last name');
+            }
+            
+            updatesPerformed = true;
         }
 
-        const contractId = contractResult[0].Contract_Details_ID;
+        // Update Person_Information Birthday if provided
+        if (birthdayP !== undefined) {
+            const [birthdayResult] = await connection.query(
+                'UPDATE person_information SET person_DOB = ? WHERE person_ID = ?',
+                [birthdayP, personIdEdit]
+            );
+            if (birthdayResult.affectedRows === 0) {
+                throw new Error('No rows were updated when changing birthday');
+            }
+            updatesPerformed = true;
+        }
 
-        // Update Contract_Details using the retrieved Contract_ID
-        const [contractUpdate] = await connection.query(
-            'UPDATE contract_details SET Actual_Move_In_date = ?, MoveOut_date = ? WHERE Contract_Details_ID = ?',
-            [moveInDate, moveOutDate, contractId]
-        );
+        // Address updates - only proceed if any address field is provided
+        if (street !== undefined || barangay !== undefined || city !== undefined) {
+            // Get Address_ID associated with the Person
+            const [addressResult] = await connection.execute(
+                `SELECT address_ID FROM person_address WHERE person_ID = ?`, 
+                [personIdEdit]
+            );
+            console.log("This IS THE address result:", addressResult[0]);
+            if (addressResult.length === 0) {
+                await connection.rollback();
+                return res.status(404).json({ message: "Address not found for this person." });
+            }
 
-        if (personUpdate.affectedRows === 0 || contractUpdate.affectedRows === 0) {
+            const addressId = addressResult[0].address_ID;
+            console.log("This IS THE ADDRESS:", addressId);
+            console.log("THIS IS THE STREET:", street);
+            
+            // Update Street if provided
+            if (street !== undefined) {
+                const [streetResult] = await connection.execute(
+                    `UPDATE address SET Person_Street = ? WHERE address_ID = ?`, 
+                    [street, addressId]
+                );
+                if (streetResult.affectedRows === 0) {
+                    throw new Error('No rows were updated when changing street');
+                }
+                updatesPerformed = true;
+            }
+            
+            // Only proceed with barangay update if provided
+            if (barangay !== undefined) {
+                const [brgyResult] = await connection.execute(
+                    `SELECT brgy_ID FROM address WHERE address_id = ?`, 
+                    [addressId]
+                );
+
+                if (brgyResult.length === 0) {
+                    await connection.rollback();
+                    return res.status(404).json({ message: "Barangay not found for this address." });
+                }
+
+                const barangayId = brgyResult[0].brgy_ID;
+                
+                // Update Barangay Name
+                const [brgyUpdateResult] = await connection.execute(
+                    `UPDATE barangay SET brgy_Name = ? WHERE brgy_ID = ?`,
+                    [barangay, barangayId]
+                );
+                if (brgyUpdateResult.affectedRows === 0) {
+                    throw new Error('No rows were updated when changing barangay');
+                }
+                updatesPerformed = true;
+            }
+
+            // Only proceed with city update if provided
+            if (city !== undefined) {
+                // First get the barangay ID if we haven't already
+                let barangayId;
+                console.log("THIS IS THE ADDRESS ID BARANGAY STUFF", addressId);
+                if (barangay !== undefined) {
+                    const [brgyResult] = await connection.execute(
+                        `SELECT brgy_ID FROM address WHERE address_id = ?`, 
+                        [addressId]
+                    );
+                    
+                    if (brgyResult.length === 0) {
+                        await connection.rollback();
+                        return res.status(404).json({ message: "Barangay not found for this address." });
+                    }
+                    console.log("THIS IS THE BARANGAY RESULT", brgyResult[0]);
+                    barangayId = brgyResult[0].brgy_ID;
+                }
+                
+                console.log("THIS IS THE BARANGAY", barangayId);
+                const [cityResult] = await connection.execute(
+                    `SELECT city_ID FROM barangay WHERE brgy_ID = ?`, 
+                    [barangayId]
+                );
+
+                if (cityResult.length === 0) {
+                    await connection.rollback();
+                    return res.status(404).json({ message: "City not found for this barangay." });
+                }
+
+                const cityId = cityResult[0].city_ID;
+
+                // Update City Name
+                const [cityUpdateResult] = await connection.execute(
+                    `UPDATE city SET city_Name = ? WHERE city_ID = ?`,
+                    [city, cityId]
+                );
+                if (cityUpdateResult.affectedRows === 0) {
+                    throw new Error('No rows were updated when changing city');
+                }
+                updatesPerformed = true;
+            }
+        }
+
+        // Contract details updates - only proceed if moveIn or moveOut is provided
+        if (moveIn !== undefined || moveOut !== undefined) {
+            // Retrieve the correct Contract_ID for this Person_ID
+            const [contractResult] = await connection.query(
+                'SELECT cd.Contract_Details_ID FROM contract_details cd join contract c on cd.contract_details_id = c.contract_id join person_information p on c.person_id = p.person_id WHERE p.person_id = ?',
+                [personIdEdit]
+            );
+
+            if (contractResult.length === 0) {
+                await connection.rollback();
+                return res.status(404).json({ error: "Contract not found for this tenant." });
+            }
+
+            const contractId = contractResult[0].Contract_Details_ID;
+            
+            // Build the update query dynamically based on provided values
+            let updateFields = [];
+            let updateValues = [];
+            
+            if (moveIn !== undefined) {
+                updateFields.push('Actual_Move_In_date = ?');
+                updateValues.push(moveIn);
+            }
+            
+            if (moveOut !== undefined) {
+                updateFields.push('MoveOut_date = ?');
+                updateValues.push(moveOut);
+            }
+            
+            if (updateFields.length > 0) {
+                // Add contractId to the values array
+                updateValues.push(contractId);
+                
+                // Construct and execute the update query
+                const updateQuery = `UPDATE contract_details SET ${updateFields.join(', ')} WHERE Contract_Details_ID = ?`;
+                const [contractUpdateResult] = await connection.query(updateQuery, updateValues);
+                if (contractUpdateResult.affectedRows === 0) {
+                    throw new Error('No rows were updated when changing contract details');
+                }
+                updatesPerformed = true;
+            }
+        }
+
+        // Check if any updates were performed
+        if (!updatesPerformed) {
             await connection.rollback();
-            return res.status(404).json({ error: "No changes made or tenant not found." });
+            return res.status(200).json({ message: "No changes were made - all fields were undefined." });
         }
 
         await connection.commit();
@@ -370,7 +578,7 @@ app.put('/edit-tenant/:personId', async (req, res) => {
     } catch (error) {
         await connection.rollback();
         console.error(error);
-        res.status(500).json({ error: "Failed to update tenant." });
+        res.status(500).json({ error: "Failed to update tenant: " + error.message });
     } finally {
         connection.release();
     }
@@ -626,7 +834,8 @@ app.get('/search-tenant/:userInput', async (req, res) => {
                     COALESCE(MIN(c.Region_Name), 'Unknown') AS Region_Name, 
                     COALESCE(MIN(r.room_id), 'No Room') AS room_id,  
                     al.apt_location,
-                    COALESCE(MIN(DATE(cd.actual_move_in_date)), '0000-00-00') AS actual_move_in_date 
+                    COALESCE(MIN(DATE(cd.actual_move_in_date)), '0000-00-00') AS actual_move_in_date,
+                    COALESCE(MIN(DATE(cd.moveout_date)), '0000-00-00') AS actual_move_out_date 
                 FROM person_information pi
                 LEFT JOIN person_sex ps ON pi.Person_sex = ps.sex_id
                 LEFT JOIN person_address pa ON pi.Person_ID = pa.Person_ID
@@ -656,7 +865,8 @@ app.get('/search-tenant/:userInput', async (req, res) => {
                     COALESCE(MIN(c.Region_Name), 'Unknown') AS Region_Name, 
                     COALESCE(MIN(r.room_id), 'No Room') AS room_id,  
                     MIN(al.apt_location) AS apt_location,  
-                    COALESCE(MIN(DATE(cd.actual_move_in_date)), '0000-00-00') AS actual_move_in_date 
+                    COALESCE(MIN(DATE(cd.actual_move_in_date)), '0000-00-00') AS actual_move_in_date,
+                    COALESCE(MIN(DATE(cd.moveout_date)), '0000-00-00') AS actual_move_out_date
                 FROM person_information pi
                 LEFT JOIN person_sex ps ON pi.Person_sex = ps.sex_id
                 LEFT JOIN person_address pa ON pi.Person_ID = pa.Person_ID
@@ -687,7 +897,8 @@ app.get('/search-tenant/:userInput', async (req, res) => {
                         COALESCE(MIN(c.Region_Name), 'Unknown') AS Region_Name, 
                         COALESCE(MIN(r.room_id), 'No Room') AS room_id,  
                         MIN(al.apt_location) AS apt_location,  
-                        COALESCE(MIN(DATE(cd.actual_move_in_date)), '0000-00-00') AS actual_move_in_date 
+                        COALESCE(MIN(DATE(cd.actual_move_in_date)), '0000-00-00') AS actual_move_in_date,
+                        COALESCE(MIN(DATE(cd.moveout_date)), '0000-00-00') AS actual_move_out_date
                     FROM person_information pi
                     LEFT JOIN person_sex ps ON pi.Person_sex = ps.sex_id
                     LEFT JOIN person_address pa ON pi.Person_ID = pa.Person_ID
@@ -718,7 +929,8 @@ app.get('/search-tenant/:userInput', async (req, res) => {
                         COALESCE(MIN(c.Region_Name), 'Unknown') AS Region_Name, 
                         COALESCE(MIN(r.room_id), 'No Room') AS room_id,  
                         MIN(al.apt_location) AS apt_location,  
-                        COALESCE(MIN(DATE(cd.actual_move_in_date)), '0000-00-00') AS actual_move_in_date 
+                        COALESCE(MIN(DATE(cd.actual_move_in_date)), '0000-00-00') AS actual_move_in_date,
+                        COALESCE(MIN(DATE(cd.moveout_date)), '0000-00-00') AS actual_move_out_date
                     FROM person_information pi
                     LEFT JOIN person_sex ps ON pi.Person_sex = ps.sex_id
                     LEFT JOIN person_address pa ON pi.Person_ID = pa.Person_ID
@@ -752,7 +964,8 @@ app.get('/search-tenant/:userInput', async (req, res) => {
                             COALESCE(MIN(c.Region_Name), 'Unknown') AS Region_Name, 
                             COALESCE(MIN(r.room_id), 'No Room') AS room_id,  
                             MIN(al.apt_location) AS apt_location, 
-                            COALESCE(MIN(DATE(cd.actual_move_in_date)), '0000-00-00') AS actual_move_in_date 
+                            COALESCE(MIN(DATE(cd.actual_move_in_date)), '0000-00-00') AS actual_move_in_date,
+                            COALESCE(MIN(DATE(cd.moveout_date)), '0000-00-00') AS actual_move_out_date
                         FROM person_information pi
                         LEFT JOIN person_sex ps ON pi.Person_sex = ps.sex_id
                         LEFT JOIN person_address pa ON pi.Person_ID = pa.Person_ID
@@ -783,7 +996,8 @@ app.get('/search-tenant/:userInput', async (req, res) => {
                             COALESCE(MIN(c.Region_Name), 'Unknown') AS Region_Name, 
                             COALESCE(MIN(r.room_id), 'No Room') AS room_id,  
                             MIN(al.apt_location) AS apt_location, 
-                            COALESCE(MIN(DATE(cd.actual_move_in_date)), '0000-00-00') AS actual_move_in_date 
+                            COALESCE(MIN(DATE(cd.actual_move_in_date)), '0000-00-00') AS actual_move_in_date,
+                            COALESCE(MIN(DATE(cd.moveout_date)), '0000-00-00') AS actual_move_out_date
                         FROM person_information pi
                         LEFT JOIN person_sex ps ON pi.Person_sex = ps.sex_id
                         LEFT JOIN person_address pa ON pi.Person_ID = pa.Person_ID
