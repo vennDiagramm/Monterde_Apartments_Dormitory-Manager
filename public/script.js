@@ -1785,13 +1785,13 @@ async function viewTenantReport(contracts) {
             <td>${contract["Sex"]}</td>
             <td>${contract["Apartment Location"]}</td>
             <td>₱${contract["Room Price"].toLocaleString()}</td>
-            <td>₱${contract["Electricity Bill"].toLocaleString()}</td>
-            <td>₱${contract["Water Bill"].toLocaleString()}</td>
+            <td>₱${contract["Utilities Total"].toLocaleString()}</td>
             <td>₱${contract["Other Charges"].toLocaleString()}</td>
             <td>₱${contract["Total Bill"].toLocaleString()}</td>
             <td>₱${contract["Balance"].toLocaleString()}</td>
             <td>${contract["Contract Date"]}</td>
             <td>₱${contract["Payment Amount"].toLocaleString()}</td>
+            <td>${contract["Payment Date"]}</td>
         `;
         tbody.appendChild(row);
     });
