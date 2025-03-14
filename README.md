@@ -65,9 +65,9 @@ node server/server.js
 
 After installation, navigate to the Landing Page and click the animated button to launch the application.
 
-## 🔗 Live Demo
+## 🔗 Live Demo of the Application
 
-[Check out the live application]([https://your-app-link-here](https://monterde-apartments.up.railway.app/))
+[Check out the live application](https://monterde-apartments.up.railway.app/)
 
 ## 👨‍💻 Author
 
