@@ -500,6 +500,18 @@
                     <form id="paymentTenantForm" class="row g-3">
                         <!-- First Row: Name Fields -->
                         <div class="col-12">
+                            <label for="personId" class="form-label">Person ID:</label>
+                            <input type="number" id="personId" class="form-control">
+                        </div>
+                        <div class="col-12">
+                            <label for="roomId" class="form-label">Room ID:</label>
+                            <input type="number" id="roomId" class="form-control">
+                        </div>
+                        <div class="col-12">
+                            <label for="total_rent" class="form-label">Total Rent:</label>
+                            <input type="text" id="total_rent" class="form-control" readonly>
+                        </div>
+                        <div class="col-12">
                             <label for="start_meter" class="form-label">Previous Meter:</label>
                             <input type="number" id="start_meter" class="form-control">
                         </div>
@@ -508,28 +520,128 @@
                             <input type="number" id="end_meter" class="form-control">
                         </div>
                         <div class="col-12">
-                            <label for="water_bill" class="form-label">Water Bill:</label>
-                            <input type="number" id="water_bill" class="form-control">
-                        </div>
-                        <div class="col-12">
-                            <label for="total_rent" class="form-label">Total Rent:</label>
-                            <input type="number" id="total_rent" class="form-control" readonly>
-                        </div>
-                        <div class="col-12">
-                            <label for="payment_input" class="form-label">Payment:</label>
-                            <input type="number" id="payment_input" class="form-control">
-                        </div>
-                        <div class="col-12">
-                            <label for="change_input" class="form-label">Change:</label>
-                            <input type="number" id="change_input" class="form-control" readonly>
+                            <label for="water_bill" class="form-label">Water Bill: </label> 
+                            <input type="number" id="water_bill" class="form-control" value="150"><!--Add a default value?-->
                         </div>
                         
                         <!-- Last Row: Submit Button Centered -->
                         <div class="col-12 full-width">
-                            <button type="submit" class="btn btn-primary">Submit</button>
+                            <button type="button" class="btn btn-primary" id="confirmPaymentBtn">Confirm</button>
                         </div>
-                    </form>
-                </div>
+                        
+                        <!-- Options for Payment Section -->
+                        <div class="p-3 bg-dark rounded shadow mt-3 full-width" >
+                            <button class="btn btn-secondary d-block w-100 mb-3" type="button" 
+                                data-bs-toggle="collapse" data-bs-target="#collapsePaymentOptions" aria-expanded="false">
+                                Options &nbsp;<i class="bi bi-caret-down-fill"></i>
+                            </button>
+                            
+                            
+                            <div id="collapsePaymentOptions" class="collapse w-100">
+                                <div class="d-flex flex-column align-items-center gap-3 mb-3">
+                                    <button type="button" id="btnPayRent" class="btn btn-primary w-75 px-4 py-2"
+                                        data-bs-toggle="modal" data-bs-target="#modalRentPayment">
+                                        <i class="bi bi-cash-stack"></i> Pay Rent
+                                    </button>
+
+                                    <button type="button" id="btnPayMiscellaneous" class="btn btn-danger w-75 px-4 py-2"
+                                        data-bs-toggle="modal" data-bs-target="#modalMiscPayment">
+                                        <i class="bi bi-receipt"></i> Pay Misc.
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>  
+
+                    <!-- Rent Payment Modal -->
+                    <div class="modal fade" id="modalRentPayment" tabindex="-1" aria-labelledby="labelRentPayment" aria-hidden="true">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content bg-dark text-white rounded shadow">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="labelRentPayment">
+                                        <i class="bi bi-cash-stack"></i> Rent Payment
+                                    </h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form id="formRentPayment" class="row g-3">
+                                        
+                                        <div class="col-12 text-center">
+                                            <label for="rentPaymentTotal" class="form-label fs-5">Total Rent Amount:</label>
+                                            <input type="text" id="rentPaymentTotal" class="form-control text-center fs-4 fw-bold" min="0" readonly>
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label for="inputRentPaymentAmount" class="form-label">Payment Amount:</label>
+                                            <input type="number" id="inputRentPaymentAmount" class="form-control">
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label for="inputRentPaymentRemarks" class="form-label">Remarks:</label>
+                                            <input type="text" id="inputRentPaymentRemarks" class="form-control">
+                                        </div>
+
+                                        <div class="col-12 text-center">
+                                            <label for="changeRentAmount" class="form-label">Change:</label>
+                                            <input type="text" id="changeRentAmount" class="form-control text-center fs-4 fw-bold" min="0" readonly>
+                                        </div>
+
+                                        <div class="col-12 text-center mt-3">
+                                            <button type="submit" class="btn btn-success px-4 py-2">
+                                                <i class="bi bi-check-circle"></i> Pay Rent
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Miscellaneous Payment Modal -->
+                    <div class="modal fade" id="modalMiscPayment" tabindex="-1" aria-labelledby="labelMiscPayment" aria-hidden="true">
+                        <div class="modal-dialog modal-lg"> <!-- Larger Modal for better visibility -->
+                            <div class="modal-content bg-dark text-white rounded shadow">
+                                <div class="modal-header">
+                                    <h5 class="modal-title" id="labelMiscPayment">
+                                        <i class="bi bi-receipt"></i> Miscellaneous Payment
+                                    </h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                </div>
+                                <div class="modal-body">
+                                    <form id="formMiscPayment" class="row g-3">
+                                        <!-- Miscellaneous Fees Display (Centered & Bold) -->
+                                        <div class="col-12 text-center">
+                                            <label for="miscPaymentTotal" class="form-label fs-5">Total Miscellaneous Fees:</label>
+                                            <input type="text" id="miscPaymentTotal" class="form-control text-center fs-4 fw-bold" min="0" readonly>
+                                        </div>
+
+                                        <!-- Two-Column Layout (Consistent with Rent Payment Modal) -->
+                                        <div class="col-md-6">
+                                            <label for="inputMiscPaymentAmount" class="form-label">Payment Amount:</label>
+                                            <input type="number" id="inputMiscPaymentAmount" class="form-control">
+                                        </div>
+
+                                        <div class="col-md-6">
+                                            <label for="inputMiscPaymentRemarks" class="form-label">Remarks:</label>
+                                            <input type="text" id="inputMiscPaymentRemarks" class="form-control">
+                                        </div>
+
+                                        <div class="col-12 text-center">
+                                            <label for="changeMiscAmount" class="form-label">Change:</label>
+                                            <input type="text" id="changeMiscAmount" class="form-control text-center fs-4 fw-bold" min="0" readonly>
+                                        </div>
+                                        <!-- Confirm Payment Button -->
+                                        <div class="col-12 text-center mt-3">
+                                            <button type="submit" class="btn btn-success px-4 py-2">
+                                                <i class="bi bi-check-circle"></i> Payment Miscellaneous
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>    
                 <!-- End of Payment Tenant Form -->
 
                 <!--    Reports     -->
