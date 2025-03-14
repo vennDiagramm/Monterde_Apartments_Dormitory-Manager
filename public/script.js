@@ -1521,7 +1521,7 @@ document.addEventListener('DOMContentLoaded', function () {
         try {
             let personId = Number(document.getElementById("personId").value);
             let roomId = Number(document.getElementById("roomId").value);
-
+            console.log("IS THIS ROOM ID?", roomId);
             // Check if valid numbers
             if (!roomId || isNaN(roomId) || roomId <= 0) {
                 alert("Invalid Room ID.");
@@ -1558,6 +1558,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
                     const rentersData = await rentersResponse.json();
                     numRenters = rentersData.numRenters;
+                    console.log("IS THE NUM RENTERS BLUE?", numRenters);
+                    console.log(rentersData);
 
                 } catch (error) {
                     console.error("Error fetching number of renters:", error);
@@ -1571,9 +1573,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 const electricData = await electricResponse.json();
                 const electricBill = Number(electricData.total_bill); // with the function of calculateElectricity, this is the utility
 
+                console.log("THEM RENT PRICE:", rentPrice);
+                console.log("THEM electric PRICE:", electricBill);
+                console.log("THEM numRenters:", numRenters);
+        
                 // Calculate Total Rent
                 if (waterBill !== 150) {
-                    rentPrice = rentPrice + electricBill - (150 * numRenters) + (waterBill * numRenters);
+                    rentPrice = (rentPrice + electricBill - (150 * numRenters)) + (waterBill * numRenters);
                 } else {
   
                     rentPrice += electricBill;
@@ -2007,3 +2013,106 @@ async function initializeReports() {
     // Initialize age distribution chart
     createAgeDistributionChart();
 }
+
+
+// Automated Monthly Billing Function
+async function calculateMonthlyBill() {
+    try {
+        // Get current date to check if it's the 15th
+        const today = new Date();
+        const day = today.getDate();
+        
+        // Only run on the 15th of each month
+        if (day !== 15) {
+            console.log("Not the 15th of the month. Skipping billing calculation.");
+            return;
+        }
+        
+        console.log("Starting monthly billing calculation...");
+        
+        // Get all active rooms
+        const roomsResponse = await fetch('/get-active-rooms');
+        const roomsData = await roomsResponse.json();
+        
+        if (!roomsResponse.ok) {
+            throw new Error('Failed to fetch active rooms');
+        }
+        
+        // Process each room
+        for (const room of roomsData) {
+            const roomId = room.room_id;
+            
+            // Get room price
+            const priceResponse = await fetch(`/get-room-price/${roomId}`);
+            const priceData = await priceResponse.json();
+            
+            if (!priceResponse.ok) {
+                console.error(`Failed to get price for room ${roomId}`);
+                continue;
+            }
+            
+            const rentPrice = Number(priceData.rent_price);
+            
+            // Get meter readings
+            const meterStart = Number(document.getElementById("start_meter").value);
+            const meterEnd = Number(document.getElementById("end_meter").value);
+            
+            let numRenters = 0; 
+            const waterBill = Number(document.getElementById("water_bill").value);
+            const rentersResponse = await fetch(`http://localhost:3000/get-number-of-renters?roomId=${roomId}`);
+            const rentersData = await rentersResponse.json();
+            numRenters = rentersData.numRenters;
+            
+            // Calculate total rent
+            const totalFinalRent = rentPrice + ((meterEnd - meterStart) * 12) + (waterBill * numRenters);
+            
+            console.log(`Room ${roomId}: Rent = ${rentPrice}, Electricity = ${(meterEnd - meterStart) * 12}, Water = ${waterBill * numRenters}`);
+            console.log(`Total bill for room ${roomId}: ${totalFinalRent}`);
+            
+            // DAPAT MAG E STORE NIYA ANG RESULTS KAY CONTRACT BILL
+
+        }
+        
+        console.log("Monthly billing calculation completed successfully");
+        
+        // Show success notification
+        mySwalala.fire({
+            title: "Success!",
+            text: "Monthly bills have been calculated and updated successfully!",
+            icon: "success",
+            iconColor: "#006400"
+        });
+        
+    } catch (error) {
+        console.error("Error in monthly billing calculation:", error);
+        
+        // Show error notification
+        mySwalala.fire({
+            title: "Failed!",
+            text: "Failed to calculate monthly bills: " + error.message,
+            icon: "error",
+            iconColor: "#8B0000",
+            confirmButtonColor: "#dc3545"
+        });
+    }
+}
+
+// Function to set up the scheduled task
+function setupMonthlyBilling() {
+    // Check if we should run the billing calculation on page load
+    const today = new Date();
+    const day = today.getDate();
+    
+    if (day === 15) {
+        calculateMonthlyBill();
+    }
+    
+    // Schedule the function to check daily
+    // (in a real system, this would be handled by a server-side cron job)
+    setInterval(() => {
+        calculateMonthlyBill();
+    }, 24 * 60 * 60 * 1000); // Check once every 24 hours
+}
+
+// Initialize the monthly billing system when the page loads
+document.addEventListener('DOMContentLoaded', setupMonthlyBilling);

@@ -644,7 +644,6 @@ app.get('/get-room-price/:roomId', async (req, res) => {
 
 // Payment Process
 app.post("/process-payment", async (req, res) => {
-    console.log("ASJFEWWERNWEEFNJE");
     
     const { personId, roomId, amountPaid, remarks } = req.body;
     
@@ -668,6 +667,8 @@ app.post("/process-payment", async (req, res) => {
         const contractBillId = results[0].contract_Bill_ID;
         const contractDate = results[0].contract_date;
 
+        console.log("THE LATEST CONTRACT BILL", contractBillId);
+        console.log("THE LATEST CONTRACT DATE", contractDate);
         // Step 2: Insert the Payment
         await db.query(
             `INSERT INTO payment (Contract_Bill_ID, Date, Amount, Remarks)
@@ -801,7 +802,7 @@ app.post("/createBillWithDetails", async (req, res) => {
 // Fetch Room Max Renters
 app.get('/get-number-of-renters', async (req, res) => {
     const { roomId } = req.query;
-
+    console.log("IS THIS ACTUALLY EVEN ENTERING?", roomId);
     if (isNaN(roomId)) {
         return res.status(400).json({ error: "Invalid Room ID" });
     }
@@ -814,6 +815,7 @@ app.get('/get-number-of-renters', async (req, res) => {
             return res.status(404).json({ error: "No max renters found for this room ID" });
         }
 
+        console.log("ROOM ROWS", rows[0])
         res.json({ numRenters: rows[0].Number_of_Renters });
     } catch (error) {
         console.error("Error fetching max renters:", error);
@@ -1146,4 +1148,203 @@ app.get('/age-distribution', async (req, res) => {
 // 🔹 Start the Server
 app.listen(port, () => {
     console.log(`Server running at http://localhost:${port}`);
+});
+
+
+// Add these routes to your server.js file
+
+// Get all active rooms
+app.get('/get-active-rooms', async (req, res) => {
+    const connection = await db.getConnection();
+    
+    try {
+        const [rows] = await connection.execute(
+            'SELECT room_id FROM room WHERE room_status_id = 2'
+        );
+        
+        res.json(rows);
+    } catch (error) {
+        console.error('Error fetching active rooms:', error);
+        res.status(500).json({ error: "Failed to fetch active rooms" });
+    } finally {
+        connection.release();
+    }
+});
+
+// // Get meter readings for a specific room
+// app.get('/get-meter-readings/:roomId', async (req, res) => {
+//     const connection = await db.getConnection();
+//     const roomId = req.params.roomId;
+    
+//     try {
+//         // Get the previous month's end reading as this month's start reading
+//         const [previousReading] = await connection.execute(
+//             'SELECT end_meter FROM utility_readings WHERE room_id = ? ORDER BY reading_date DESC LIMIT 1',
+//             [roomId]
+//         );
+        
+//         let startMeter = 0;
+//         if (previousReading.length > 0) {
+//             startMeter = previousReading[0].end_meter;
+//         }
+        
+//         // Get current meter reading
+//         const [currentReading] = await connection.execute(
+//             'SELECT meter_reading AS end_meter FROM room WHERE room_id = ?',
+//             [roomId]
+//         );
+        
+//         let endMeter = 0;
+//         if (currentReading.length > 0) {
+//             endMeter = currentReading[0].end_meter;
+//         }
+        
+//         res.json({
+//             start_meter: startMeter,
+//             end_meter: endMeter
+//         });
+        
+//         // Store this reading for next month's calculation
+//         const today = new Date().toISOString().split('T')[0];
+//         await connection.execute(
+//             'INSERT INTO utility_readings (room_id, start_meter, end_meter, reading_date) VALUES (?, ?, ?, ?)',
+//             [roomId, startMeter, endMeter, today]
+//         );
+        
+//     } catch (error) {
+//         console.error(`Error fetching meter readings for room ${roomId}:`, error);
+//         res.status(500).json({ error: "Failed to fetch meter readings" });
+//     } finally {
+//         connection.release();
+//     }
+// });
+
+// // Get water bill rate
+// app.get('/get-water-bill', async (req, res) => {
+//     const connection = await db.getConnection();
+    
+//     try {
+//         const [rows] = await connection.execute(
+//             'SELECT rate AS water_bill FROM utility_rates WHERE utility_type = "water" ORDER BY effective_date DESC LIMIT 1'
+//         );
+        
+//         if (rows.length === 0) {
+//             return res.status(404).json({ error: "Water bill rate not found" });
+//         }
+        
+//         res.json({ water_bill: rows[0].water_bill });
+//     } catch (error) {
+//         console.error('Error fetching water bill rate:', error);
+//         res.status(500).json({ error: "Failed to fetch water bill rate" });
+//     } finally {
+//         connection.release();
+//     }
+// });
+
+// // Get tenants by room ID
+// app.get('/get-tenants-by-room/:roomId', async (req, res) => {
+//     const connection = await db.getConnection();
+//     const roomId = req.params.roomId;
+    
+//     try {
+//         const [rows] = await connection.execute(
+//             `SELECT p.person_id, p.person_FName, p.person_LName 
+//              FROM person_information p
+//              JOIN contract c ON p.person_id = c.person_id
+//              JOIN contract_details cd ON c.contract_id = cd.contract_details_id
+//              WHERE cd.room_id = ?`,
+//             [roomId]
+//         );
+        
+//         res.json(rows);
+//     } catch (error) {
+//         console.error(`Error fetching tenants for room ${roomId}:`, error);
+//         res.status(500).json({ error: "Failed to fetch tenants" });
+//     } finally {
+//         connection.release();
+//     }
+// });
+
+// Get contract details ID for a tenant
+app.post('/get-contract-details/:personId', async (req, res) => {
+    const connection = await db.getConnection();
+    const personId = req.params.personId;
+    
+    try {
+        const [rows] = await connection.execute(
+            `SELECT cd.Contract_Details_ID 
+             FROM contract_details cd 
+             JOIN contract c ON cd.contract_details_id = c.contract_id 
+             JOIN person_information p ON c.person_id = p.person_id 
+             WHERE p.person_id = ?`,
+            [personId]
+        );
+        
+        if (rows.length === 0) {
+            return res.status(404).json({ error: "Contract details not found" });
+        }
+        
+        res.json({ contractDetailsId: rows[0].Contract_Details_ID });
+    } catch (error) {
+        console.error(`Error fetching contract details for person ${personId}:`, error);
+        res.status(500).json({ error: "Failed to fetch contract details" });
+    } finally {
+        connection.release();
+    }
+});
+
+// Get contract bill ID for a contract
+app.post('/get-contract-bill/:contractDetailsId', async (req, res) => {
+    const connection = await db.getConnection();
+    const contractDetailsId = req.params.contractDetailsId;
+    
+    try {
+        const [rows] = await connection.execute(
+            `SELECT contract_bill_id 
+             FROM contract_bill 
+             WHERE contract_details_id = ?`,
+            [contractDetailsId]
+        );
+        
+        if (rows.length === 0) {
+            // If no bill exists yet, create one
+            const [insertResult] = await connection.execute(
+                `INSERT INTO contract_bill (contract_details_id, balance, billing_date) 
+                 VALUES (?, 0, CURDATE())`,
+                [contractDetailsId]
+            );
+            
+            return res.json({ contractBillId: insertResult.insertId });
+        }
+        
+        res.json({ contractBillId: rows[0].contract_bill_id });
+    } catch (error) {
+        console.error(`Error fetching contract bill for contract ${contractDetailsId}:`, error);
+        res.status(500).json({ error: "Failed to fetch contract bill" });
+    } finally {
+        connection.release();
+    }
+});
+
+// Update contract bill
+app.put('/update-contract-bill/:contractBillId', async (req, res) => {
+    const connection = await db.getConnection();
+    const contractBillId = req.params.contractBillId;
+    const { balance, billingDate } = req.body;
+    
+    try {
+        await connection.execute(
+            `UPDATE contract_bill 
+             SET balance = ?, billing_date = ? 
+             WHERE contract_bill_id = ?`,
+            [balance, billingDate, contractBillId]
+        );
+        
+        res.json({ message: "Contract bill updated successfully" });
+    } catch (error) {
+        console.error(`Error updating contract bill ${contractBillId}:`, error);
+        res.status(500).json({ error: "Failed to update contract bill" });
+    } finally {
+        connection.release();
+    }
 });
