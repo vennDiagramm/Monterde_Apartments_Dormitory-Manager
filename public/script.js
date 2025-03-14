@@ -229,8 +229,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    //const paymentForm = document.getElementById('paymentTenantForm');
-    //paymentForm.addEventListener('submit', paymentProcess);
+    const paymentForm = document.getElementById('paymentTenantForm');
+    paymentForm.addEventListener('submit', paymentProcess);
 
 });
 
@@ -1208,6 +1208,7 @@ document.addEventListener('DOMContentLoaded', function () {
             
             //Calls payment process
             paymentProcess();
+            console.log("this")
 
             //Update change
             const changeRentAmount = document.getElementById("changeRentAmount");
