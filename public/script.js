@@ -2021,6 +2021,7 @@ async function calculateMonthlyBill() {
         // Get current date to check if it's the 15th
         const today = new Date();
         const day = today.getDate();
+        const formattedDate = today.toISOString().split("T")[0]; 
         
         // Only run on the 15th of each month
         if (day !== 15) {
@@ -2070,7 +2071,21 @@ async function calculateMonthlyBill() {
             console.log(`Total bill for room ${roomId}: ${totalFinalRent}`);
             
             // DAPAT MAG E STORE NIYA ANG RESULTS KAY CONTRACT BILL
+            const storeBillResponse = await fetch("/store-monthly-bill", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    roomId: roomId,
+                    totalBill: totalFinalRent,
+                    dateCovered: formattedDate,
+                    balance: totalFinalRent // Assuming initial balance is full bill amount
+                }),
+            });
 
+            if (!storeBillResponse.ok) {
+                console.error(`Failed to store billing data for room ${roomId}`);
+                continue;
+            }
         }
         
         console.log("Monthly billing calculation completed successfully");

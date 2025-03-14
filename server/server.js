@@ -1348,3 +1348,33 @@ app.put('/update-contract-bill/:contractBillId', async (req, res) => {
         connection.release();
     }
 });
+
+// Store Monthly Bill API
+app.post("/store-monthly-bill", async (req, res) => {
+    const { roomId, totalBill, dateCovered, balance } = req.body;
+
+    if (!roomId || !totalBill || !dateCovered) {
+        return res.status(400).json({ error: "Missing required fields: roomId, totalBill, or dateCovered" });
+    }
+
+    try {
+        const query = `
+            INSERT INTO contract_bill (Contract_Details_ID, date_covered, balance, total_bill)
+            SELECT cd.Contract_Details_ID, ?, ?, ?
+            FROM contract_details cd
+            WHERE cd.Room_ID = ?;
+        `;
+
+        const [result] = await db.execute(query, [dateCovered, balance, totalBill, roomId]);
+
+        if (result.affectedRows === 0) {
+            return res.status(404).json({ error: "No contract details found for the given room ID" });
+        }
+
+        res.json({ success: true, message: "Monthly bill recorded successfully!" });
+
+    } catch (error) {
+        console.error("Error storing monthly bill:", error);
+        res.status(500).json({ error: "Server error while storing monthly bill" });
+    }
+});
