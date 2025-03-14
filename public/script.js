@@ -1569,7 +1569,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (!electricResponse.ok) throw new Error("Failed to fetch electric bill.");
 
                 const electricData = await electricResponse.json();
-                const electricBill = Number(electricData.total_bill);
+                const electricBill = Number(electricData.total_bill); // with the function of calculateElectricity, this is the utility
 
                 // Calculate Total Rent
                 if (waterBill !== 150) {
@@ -1579,6 +1579,59 @@ document.addEventListener('DOMContentLoaded', function () {
                     rentPrice += electricBill;
                 }
 
+                const contractDetails_IDRes = await fetch(`/getCDID/${personId}`);
+                if (!contractDetails_IDRes.ok) throw new Error("Failed to get contract_Details_ID.");
+                const contractDetails_ID = await contractDetails_IDRes.json(); // Direct access, as the API returns the ID directly
+                const meterTotal = meterEnd - meterStart;
+                const utility = electricBill;
+                const balance = rentPrice;
+                const totalBill = balance;
+
+
+                const contractBillBody = {
+                    Contract_Details_ID: contractDetails_ID,
+                    total_bill: totalBill,
+                    Balance: rentPrice,
+                    Bill_meterEndMonth: meterEnd,
+                    Bill_meterStartMonth: meterStart,
+                    meter_total: meterTotal,
+                    Utility_Computation: utility
+                }
+                try{
+                    const insertBills = await fetch(`/createBillWithDetails`,{
+                        method: "POST",
+                        headers: {"Content-Type": "application/json" },
+                        body: JSON.stringify(contractBillBody)
+                    });
+
+                    if(insertBills.ok){
+                        mySwalala.fire({
+                            title: "Success!",
+                            text: "Bill Added!",
+                            icon: "success",
+                            iconColor: "#006400"
+                        });
+                    } else{
+                        mySwalala.fire({
+                            title: "Failed!",
+                            text: "Failed to add Bill!.",
+                            icon: "error",
+                            iconColor: "#8B0000",
+                            confirmButtonColor: "#dc3545"
+                        });
+                    }
+
+                } catch (error) {
+                    console.error("Error adding bill:", error);
+                    mySwalala.fire({
+                        title: "Error!",
+                        text: "Something went wrong. Please try again.",
+                        icon: "error",
+                        iconColor: "#8B0000",
+                        confirmButtonColor: "#dc3545"
+                    });
+                }
+                
             } catch (error) {
                 console.error("Error fetching electric bill:", error);
             }

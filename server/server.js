@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const path = require('path');
 const db = require('./db'); // Database connection
+const { error } = require('console');
 
 const app = express();
 const port = process.env.PORT || 3000; // Default to port 3000 if not set in .env
@@ -736,7 +737,67 @@ app.get("/get-other-charges", async (req, res) => {
     }
 });
 
- 
+// get contract_details_ID using person_ID
+app.get('/getCDID/:pId', async (req, res) => {
+    const pId = req.params.pId;
+    try {
+        const [result] = await db.query(
+            'SELECT Contract_ID AS contract_details_ID FROM contract WHERE Person_ID = (?)', [pId]
+        );
+        if (result.length === 0) {
+            return res.status(404).json({ error: "Contract details not found for the given person_ID" });
+        }
+        res.json(result[0].contract_details_ID);
+    } catch (err) {
+        console.error("Fail to get contract_details_ID: ", err); // Detailed error log
+        res.status(500).json({ error: "Database error", details: err.message });
+    }
+});
+
+// ga create ug bill + details
+app.post("/createBillWithDetails", async (req, res) => {
+    const { 
+        Contract_Details_ID,
+        total_bill,
+        Balance,
+        // These are for contract_bill_details
+        Bill_meterEndMonth,
+        Bill_meterStartMonth,
+        meter_total,
+        Utility_Computation
+    } = req.body;
+    
+    try {
+        // First, create the contract bill
+        const [billResult] = await db.query(
+            'CALL CreateContractBill(?, NULL, NULL, ?, ?, @new_id)',
+            [Contract_Details_ID, Balance, total_bill]
+        );
+
+        const newBillId = billResult[0][0].new_bill_id;
+        
+        // Now create the contract bill details using the new bill ID
+        await db.query(
+            'INSERT INTO contract_bill_details (Contract_Bill_ID, Bill_meterEndMonth, Bill_meterStartMonth, meter_total, Utility_Computation) VALUES (?, ?, ?, ?, ?)',
+            [newBillId, Bill_meterEndMonth, Bill_meterStartMonth, meter_total, Utility_Computation]
+        );
+        
+        res.status(200).json({ 
+            message: "Contract Bill Created Successfully with Details!", 
+            Contract_Bill_ID: newBillId 
+        });
+
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ 
+            message: "Error creating contract bill with details", 
+            error: error.message 
+        });
+    }
+});
+
+
+
 // Fetch Room Max Renters
 app.get('/get-number-of-renters', async (req, res) => {
     const { roomId } = req.query;
