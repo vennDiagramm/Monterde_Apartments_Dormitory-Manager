@@ -638,14 +638,34 @@ h2 {
 /* Edit Tenant Form Styling */
 #editTenantFormContainer {
     display: none;
-    width: 70vw; 
-    min-width: 40vw; 
-    height: fit-content;
-    margin: 5vh auto; 
+    max-height: 90vh;
+    min-width: 70vw;
+    table-layout: fixed; /* Ensures even column spacing */
+    width: 100%;
+    margin: auto;
     background: #222;
-    padding: 5vh; 
-    border-radius: 2vw; 
-    box-shadow: 0px 4px 5vh rgba(0, 0, 0, 0.5); 
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
+    overflow-y: auto; 
+    scrollbar-width: thin;
+    -ms-overflow-style: auto;
+    position: relative;
+}
+
+#editTenantFormContainer table th, 
+#editTenantFormContainer table td {
+    padding: 16px 16px; /* Increase cell padding */
+}
+
+
+#editTenantFormContainer::-webkit-scrollbar {
+    width: 8px;
+}
+
+#editTenantFormContainer::-webkit-scrollbar-thumb {
+    background-color: #444;
+    border-radius: 4px;
 }
 
 /* Input Fields */

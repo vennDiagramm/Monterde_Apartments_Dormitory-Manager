@@ -115,7 +115,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // Edit Tenant
+    // Edit Tenant Form
     const editTenantBtn = document.getElementById("editTenantBtn");
     const editTenantFormContainer = document.getElementById("editTenantFormContainer");
 
@@ -126,6 +126,11 @@ document.addEventListener('DOMContentLoaded', function() {
             mainContentArea.appendChild(editTenantFormContainer);
         })
     }
+    editTenantBtn.addEventListener("click", async function () {
+        const response = await fetch(`http://localhost:3000/search-tenant/All`)
+        const tenant = await response.json();
+        viewEditTenantInfo(tenant);
+    })
 
     // Dismiss Tenant Form
     const dismissTenentBtn = document.getElementById("dismissTenantBtn");
@@ -144,7 +149,7 @@ document.addEventListener('DOMContentLoaded', function() {
         const response = await fetch(`/getTenantInfo/${aptLocId}`) // For the table in dismiss
         const tenant = await response.json();
         viewTenantInfo(tenant);
-    })
+    });
 
     //Room Management
     const roomsBtn = document.getElementById("roomsBtn");
@@ -398,6 +403,246 @@ async function viewTenantInfo(tenants) {
 }
 // End of Populate room with details
 
+// Table in Edit Tenant
+async function viewEditTenantInfo(tenants) {
+    const tbody = document.getElementById('tenantInfoTable').querySelector('tbody');
+    tbody.innerHTML = '';  // Clear existing table data
+    tenants.forEach(tenant => {
+        // Format address
+        const address = [
+          tenant.Person_Street || "",
+          tenant.Brgy_Name || "",
+          tenant.City_Name || ""
+        ].filter(Boolean).join(", ");
+        
+        // Format move-in date
+        const moveInDate = tenant.actual_move_in_date !== '0000-00-00' 
+          ? new Date(tenant.actual_move_in_date).toLocaleDateString() 
+          : 'Not available';
+
+        // Format move-out date
+        const moveOutDate = tenant.actual_move_out_date !== '0000-00-00' 
+          ? new Date(tenant.actual_move_out_date).toLocaleDateString() 
+          : 'Not Yet Set';
+
+        const birthDay = tenant.Person_DOB !== '0000-00-00' 
+        ? new Date(tenant.actual_move_in_date).toLocaleDateString() 
+        : 'Not available';
+        
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${tenant.Person_ID || "N/A"}</td>
+          <td>${tenant.FullName || "N/A"}</td>
+          <td>${tenant.Person_Contact || "N/A"}</td>
+          <td>${birthDay || "N/A"}</td>
+          <td>${tenant.Person_sex || "N/A"}</td>
+          <td>${tenant.room_id || "N/A"}</td>
+          <td>${address || "N/A"}</td>
+          <td>${tenant.apt_location || "N/A"}</td>
+          <td>${moveInDate}</td>
+          <td>${moveOutDate}</td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+// End of Table in Edit
+
+// Edit Tenant Details
+async function editTenant(event) {
+    event.preventDefault();
+
+    const personId = document.getElementById("personIdEdit").value;
+    const firstNameId = document.getElementById("firstNameId").value;
+    const middleNameId = document.getElementById("middleNameId").value;
+    const lastNameId = document.getElementById("lastNameId").value;
+    const birthdayP = document.getElementById("birthdayP").value;
+    const street = document.getElementById("streetP").value;
+    const barangay = document.getElementById("barangayP").value;
+    const city= document.getElementById("cityP").value;
+    const contact = document.getElementById("contactId").value;
+    const moveInDate = document.getElementById("moveInDateId").value;
+    const moveOutDate = document.getElementById("moveOutDateId").value;
+
+    if (personId === undefined || personId === "") {
+        mySwalala.fire({
+            title: "No ID Entered!",
+            text: "Must put an ID",
+            icon: "error",
+            iconColor: "#8B0000",
+            confirmButtonColor: "#dc3545"
+        });
+        return;
+    }
+
+    // Function to check if a value is empty (handles both strings and numbers)
+    function isEmpty(value) {
+        return value === "" || value === null || value === undefined || (typeof value === "string" && value.trim() === "");
+    }
+    
+    if (
+        isEmpty(firstNameId) &&
+        isEmpty(middleNameId) &&
+        isEmpty(lastNameId) &&
+        isEmpty(birthdayP) &&
+        isEmpty(street) &&
+        isEmpty(barangay) &&
+        isEmpty(city) &&
+        isEmpty(contact) &&
+        isEmpty(moveInDate) &&
+        isEmpty(moveOutDate)
+    ) {
+        mySwalala.fire({
+            title: "No Inputs Detected!",
+            text: "Atleast put one input",
+            icon: "error",
+            iconColor: "#8B0000",
+            confirmButtonColor: "#dc3545"
+        });
+        return;
+    } 
+
+
+    // Check if some Address fields are filled while others are empty
+    if ((street && !barangay && !city) || (!street && barangay && !city) || (!street && !barangay && city)) {
+        mySwalala.fire({
+            title: "All address fields must be filled!",
+            text: "If you are going to change the address then please fill all fields",
+            icon: "error",
+            iconColor: "#8B0000",
+            confirmButtonColor: "#dc3545"
+        });
+        return;
+    }
+
+    console.log(`The person id: ${personId}`);
+    console.log(contact);
+    console.log(moveInDate);
+    console.log(moveOutDate);
+
+    let requestData = {};
+
+    let moveIn = "";
+    let moveOut = "";
+    if (moveInDate) {
+        moveIn = new Date(moveInDate);
+        requestData.moveIn = moveIn;
+    }
+
+    if (moveOutDate) {
+        moveOut = new Date(moveOutDate);
+        requestData.moveOut = moveOut;
+    }
+
+    if (firstNameId) {
+        requestData.firstNameId = firstNameId;
+    }
+
+    if (middleNameId) {
+        requestData.middleNameId = middleNameId;
+    }
+    
+    if (lastNameId) {
+        requestData.lastNameId = lastNameId;
+    }
+    
+    if (birthdayP) {
+        requestData.birthdayP = birthdayP;
+    }
+    
+    if (street) {
+        requestData.street = street;
+    }
+    
+    if (barangay) {
+        requestData.barangay = barangay;
+    }
+    
+    if (city) {
+        requestData.city = city;
+    }
+
+    if (contact) {
+        if (!/^\d{11}$/.test(contact)) {
+            mySwalala.fire({
+                title: "Contact Number Issue!",
+                text: "Contact number must be exactly 11 digits.",
+                icon: "error",
+                iconColor: "#8B0000",
+                confirmButtonColor: "#dc3545"
+            });
+            return;
+        }
+        requestData.contact = contact; // Add contact if valid
+    }
+
+    if (moveIn && moveOut && moveIn >= moveOut) {
+        mySwalala.fire({
+            title: "Move-Out Date Issue!",
+            text: "Move-out date must be after the move-in date.",
+            icon: "error",
+            iconColor: "#8B0000",
+            confirmButtonColor: "#dc3545"
+        });
+        return;
+    }
+
+    if (moveIn && moveOut && moveOut <= moveIn) {
+        mySwalala.fire({
+            title: "Move-In Date Issue!",
+            text: "Move-In date must be before the move-out date.",
+            icon: "error",
+            iconColor: "#8B0000",
+            confirmButtonColor: "#dc3545"
+        });
+        return;
+    }
+
+    try { 
+        const response = await fetch(`/edit-tenant/${personId}`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(requestData)
+        });
+
+        const responseE = await fetch(`http://localhost:3000/search-tenant/All`)
+        const tenantE = await responseE.json();
+        // const result = await response.json();
+        
+        if (response.ok) {
+            mySwalala.fire({
+                title: "Success!",
+                text: "Tenant Information Edited Successfully!",
+                icon: "success",
+                iconColor: "#006400"
+            }).then(() => {
+                viewEditTenantInfo(tenantE);
+                event.target.reset();
+            });   
+        } else {
+            mySwalala.fire({
+                title: "No tenant found!",
+                text: "Failed to edit tenant information.",
+                icon: "error",
+                iconColor: "#8B0000",
+                confirmButtonColor: "#dc3545"
+            });
+        }
+    } catch (error) {
+        mySwalala.fire({
+            title: "Failed!",
+            text: "Failed to update tenant information.",
+            icon: "error",
+            iconColor: "#8B0000",
+            confirmButtonColor: "#dc3545"
+        });
+    }
+}
+
+const editTenantForm = document.getElementById('editTenantForm');
+if (editTenantForm) {
+    editTenantForm.addEventListener('submit', editTenant);
+}
+// End of Edit Tenant Details Function
 
 // Add Room
 async function addRoom(event) {
@@ -894,7 +1139,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     <th>Room</th>
                     <th>Address</th>
                     <th>Location</th>
-                    <th>Move-in Date</th>
+                    <th>Move-In Date</th>
+                    <th>Move-Out Date</th>
                     <th>Actions</th>
                   </tr>
                 </thead>
@@ -996,18 +1242,6 @@ document.addEventListener('DOMContentLoaded', function() {
           
           // Check if tenant belongs to current apartment
           
-          const currentApartment = getCurrentApartment(); // Assuming this function exists
-        //   const filteredTenants = tenants.filter(tenant => 
-        //     tenant.apt_location.split(" ")[0] === currentApartment.split(" ")[0]
-        //   );
-          
-        //   if (filteredTenants.length === 0) {
-        //     resultsBody.innerHTML = '<tr><td colspan="9" class="text-center">Tenant not found in this apartment.</td></tr>';
-        //     return;
-        //   }
-          
-          // Use filteredTenants instead of tenants in the forEach below
-          
           // Populate table with results
           tenants.forEach(tenant => {
             // Format address
@@ -1021,6 +1255,11 @@ document.addEventListener('DOMContentLoaded', function() {
             const moveInDate = tenant.actual_move_in_date !== '0000-00-00' 
               ? new Date(tenant.actual_move_in_date).toLocaleDateString() 
               : 'Not available';
+
+            // Format move-out date
+            const moveOutDate = tenant.actual_move_out_date !== '0000-00-00' 
+            ? new Date(tenant.actual_move_out_date).toLocaleDateString() 
+            : 'Not Yet Set';
 
             const birthDay = tenant.Person_DOB !== '0000-00-00' 
             ? new Date(tenant.actual_move_in_date).toLocaleDateString() 
@@ -1037,6 +1276,7 @@ document.addEventListener('DOMContentLoaded', function() {
               <td>${address || "N/A"}</td>
               <td>${tenant.apt_location || "N/A"}</td>
               <td>${moveInDate}</td>
+              <td>${moveOutDate}</td>
               <td>
                 <button class="action-btn view-tenant" data-id="${tenant.Person_ID}" title="View Details">
                   <i class="bi bi-eye"></i>
