@@ -475,14 +475,14 @@ app.post("/set-current-apartment", (req, res) => {
 // Function to get the stored apartment
 function getCurrentApartmentFromServer() {
     switch (currentApartment) {
-        case "1":
+        case "MATINA":
             return "Matina Crossing";
-        case "2":
+        case "SESAME":
             return "Sesame Street";
-        case "3":
+        case "NABUA":
             return "Nabua Street";
         default:
-            return "Sesame Street"; // Default to Sesame
+            return "Sesame Street";
     }
 }
 
