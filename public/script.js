@@ -1402,12 +1402,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-    // Sample data
-    const sampleTenants = [
-        { id: "101", name: 'John Doe', rent: 'Paid' },
-        { id: "102", name: 'Jane Doe', rent: 'Not yet Paid' }
-    ];
-
     // Function to populate the table
     function populateTable() {
         ensureResultsContainer(); // Ensure table exists before accessing it
@@ -1476,25 +1470,6 @@ document.addEventListener('DOMContentLoaded', function () {
             //Update change
             const changeRentAmount = document.getElementById("changeRentAmount");
             changeRentAmount.value = changeAmount
-
-            // Get reference to results body again (might have been recreated)
-            const resultsBody = document.getElementById("tenantResultsBody");
-            
-            // Refresh table
-            populateTable();
-        });
-    }
-    
-    // Form submission miscellaneous payment
-    if (formMiscPayment) {
-        formMiscPayment.addEventListener("submit", function (e) {
-            e.preventDefault();
-
-            //Calls Miscellaneous Payment Process
-            miscellaneousPaymentProcess();
-
-            const changeMiscAmount = document.getElementById("changeMiscAmount");
-            changeMiscAmount.value = changeAmount;
 
             // Get reference to results body again (might have been recreated)
             const resultsBody = document.getElementById("tenantResultsBody");
@@ -1639,33 +1614,6 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
-   // Fetch Other Charges / Miscellaneous
-    async function getMiscellaneousPrice() {
-        try {
-            const personId = document.getElementById("personId").value;
-            const roomId = document.getElementById("roomId").value;
-
-            if (!personId || !roomId) {
-                Swal.fire("Error!", "Person ID and Room ID are required.", "error");
-                return rentPrice; 
-            }
-
-            // Fetch OC_total (Other Charges)
-            const ocResponse = await fetch(`http://localhost:3000/get-other-charges?roomId=${roomId}&personId=${personId}`);
-            if (!ocResponse.ok) throw new Error("Failed to retrieve other charges");
-
-            const ocData = await ocResponse.json();
-            const ocTotal = ocData.OC_total || 0; // If no record exists, return 0
-
-            otherChargesPrice = ocTotal;
-
-            return otherChargesPrice;
-        } catch (error) {
-            console.error("Error fetching miscellaneous charges:", error);
-            return rentPrice; // Return rentPrice instead of 0
-        }
-    }
-
     // Payment Process
     async function paymentProcess(event) {
         try {
@@ -1704,50 +1652,6 @@ document.addEventListener('DOMContentLoaded', function () {
         } catch (error) {
             console.error(error);
             Swal.fire("Error!", "Error processing payment.", "error");
-        }
-    }
-
-
-    // Miscellaneous Payment Process
-    async function miscellaneousPaymentProcess(event) {
-        try {
-            // Get payment input
-            const payment = parseFloat(document.getElementById("inputMiscPaymentAmount").value);
-            const remarks = document.getElementById("inputMiscPaymentRemarks").value;
-    
-            // **Ensure updatedRentPrice is refreshed before validation**
-            otherChargesPrice = await getMiscellaneousPrice();
-    
-            // Validate payment input
-            if (!payment || payment < otherChargesPrice) {
-                Swal.fire("Error!", "Enter a valid amount greater than or equal to the total rent including miscellaneous charges.", "error");
-                return;
-            }
-    
-            // Calculate change
-           changeAmount = payment - otherChargesPrice;
-    
-            // Send payment data to the server (removed unnecessary 'change')
-            const response = await fetch("http://localhost:3000/process-payment", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({
-                    personId: document.getElementById("personId").value,
-                    roomId: document.getElementById("roomId").value,
-                    amountPaid: payment,
-                    date: new Date().toISOString().split("T")[0],
-                    remarks: remarks,
-                }),
-            });
-    
-            if (!response.ok) throw new Error("Failed to process payment");
-    
-            Swal.fire("Success!", "Miscellaneous Payment processed successfully.", "success");
-        } catch (error) {
-            console.error(error);
-            Swal.fire("Error!", "Error processing miscellaneous payment.", "error");
         }
     }
     

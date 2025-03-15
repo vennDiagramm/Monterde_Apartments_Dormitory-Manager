@@ -710,6 +710,7 @@ app.get('/calculate-electric-bill', async (req, res) => {
 });
 
 //Fetch other Charges 
+/*
 app.get("/get-other-charges", async (req, res) => {
     const { roomId, personId } = req.query;
 
@@ -737,6 +738,7 @@ app.get("/get-other-charges", async (req, res) => {
         res.status(500).json({ error: "Server error while retrieving miscellaneous charges." });
     }
 });
+*/
 
 // get contract_details_ID using person_ID
 app.get('/getCDID/:pId', async (req, res) => {
