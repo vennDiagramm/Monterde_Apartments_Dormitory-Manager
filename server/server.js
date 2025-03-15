@@ -1378,3 +1378,31 @@ app.post("/store-monthly-bill", async (req, res) => {
         res.status(500).json({ error: "Server error while storing monthly bill" });
     }
 });
+
+// Fetch Payment Data for Table
+app.get("/get-tenants-payments", async (req, res) => {
+    try {
+        const query = `
+            SELECT DISTINCT
+                o.Person_ID AS person_id, 
+                CONCAT(p.Person_FName, ' ', p.Person_LName) AS name, 
+                cd.Room_ID AS room_id, 
+                CASE 
+                    WHEN cb.Balance = 0 THEN 'Paid'
+                    ELSE 'Not Paid'
+                END AS rent_status
+            FROM contract_details cd
+            JOIN occupants o ON cd.Occupants_ID = o.Occupants_ID
+            JOIN person_information p ON o.Person_ID = p.Person_ID
+            JOIN contract_bill cb ON cd.Contract_Details_ID = cb.Contract_Details_ID
+            ORDER BY cd.Room_ID;
+        `;
+
+        const [rows] = await db.execute(query);
+        res.json(rows);
+
+    } catch (error) {
+        console.error("Error fetching tenant payment info:", error);
+        res.status(500).json({ error: "Server error while retrieving payment info." });
+    }
+});

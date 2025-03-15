@@ -1445,10 +1445,8 @@ document.addEventListener('DOMContentLoaded', function () {
         formRentPayment.addEventListener("submit", function (e) {
             e.preventDefault();
 
-            
             //Calls payment process
             paymentProcess();
-            console.log("this")
 
             //Update change
             const changeRentAmount = document.getElementById("changeRentAmount");
@@ -1457,26 +1455,8 @@ document.addEventListener('DOMContentLoaded', function () {
             // Get reference to results body again (might have been recreated)
             const resultsBody = document.getElementById("tenantResultsBody");
             
-
-            if (resultsBody) {
-                // Clear previous results
-                resultsBody.innerHTML = '';
-
-                // Populate table with results
-                sampleTenants.forEach(tenant => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${tenant.id}</td>
-                        <td>${tenant.name}</td>
-                        <td>${tenant.rent}</td>
-                        <td>
-                            <button class="action-btn" title="View Details"><i class="bi bi-eye"></i></button>
-                            <button class="action-btn" title="Edit"><i class="bi bi-pencil"></i></button>
-                        </td>
-                    `;
-                    resultsBody.appendChild(row);
-                });
-            }
+            // Refresh table
+            populateTable();
         });
     }
     
@@ -1493,26 +1473,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Get reference to results body again (might have been recreated)
             const resultsBody = document.getElementById("tenantResultsBody");
-
-            if (resultsBody) {
-                // Clear previous results
-                resultsBody.innerHTML = '';
-
-                // Populate table with results
-                sampleTenants.forEach(tenant => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${tenant.id}</td>
-                        <td>${tenant.name}</td>
-                        <td>${tenant.rent}</td>
-                        <td>
-                            <button class="action-btn" title="View Details"><i class="bi bi-eye"></i></button>
-                            <button class="action-btn" title="Edit"><i class="bi bi-pencil"></i></button>
-                        </td>
-                    `;
-                    resultsBody.appendChild(row);
-                });
-            }
+            
+            // Refresh table
+            populateTable();
         });
     }
 
@@ -1770,51 +1733,130 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
     
-    
-});
-// End of Payment Function
+     // Ensure the payment results container and table exist
+    function ensureResultsContainer() {
+        let resultsContainer = document.getElementById('paymentResultsContainer');
 
-/**     REPORTS SECTION          */
-// Report For Tenant Summary Report
-async function viewTenantReport(contracts) {
-    const tbody = document.getElementById('tenantReportTable').querySelector('tbody');
-    tbody.innerHTML = '';  // Clear existing table data
+        if (!resultsContainer) {
+            resultsContainer = document.createElement("div");
+            resultsContainer.id = "paymentResultsContainer";
+            resultsContainer.className = "mt-4";
+            resultsContainer.innerHTML = `
+                <h2>Payment Details</h2>
+                <div class="table-responsive">
+                    <table class="table table-dark table-striped table-hover">
+                        <thead>
+                            <tr>
+                                <th>Person ID</th>
+                                <th>Name</th>
+                                <th>Room ID</th>
+                                <th>Rent Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tenantResultsBody">
+                            <!-- Table data will be inserted dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            `;
 
-    contracts.forEach(contract => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>${contract["Contract Status"]}</td>
-            <td>${contract["First Name"]}</td>
-            <td>${contract["Last Name"]}</td>
-            <td>${contract["Contact Number"]}</td>
-            <td>${contract["Date of Birth"]}</td>
-            <td>${contract["Sex"]}</td>
-            <td>${contract["Apartment Location"]}</td>
-            <td>₱${contract["Room Price"].toLocaleString()}</td>
-            <td>₱${contract["Utilities Total"].toLocaleString()}</td>
-            <td>₱${contract["Other Charges"].toLocaleString()}</td>
-            <td>₱${contract["Total Bill"].toLocaleString()}</td>
-            <td>₱${contract["Balance"].toLocaleString()}</td>
-            <td>${contract["Contract Date"]}</td>
-            <td>₱${contract["Payment Amount"].toLocaleString()}</td>
-            <td>${contract["Payment Date"]}</td>
-        `;
-        tbody.appendChild(row);
-    });
-
-    // **Destroy existing DataTable instance if it exists (important!)**
-    if ($.fn.DataTable.isDataTable('#tenantReportTable')) {
-        $('#tenantReportTable').DataTable().destroy();
+            // Append the table inside the payment form container
+            const paymentTenantFormContainer = document.getElementById("paymentTenantFormContainer");
+            if (paymentTenantFormContainer) {
+                paymentTenantFormContainer.insertBefore(resultsContainer, paymentTenantFormContainer.firstChild);
+            }
+        }
     }
 
-    // **Reinitialize DataTables**
-    $('#tenantReportTable').DataTable({
-        scrollX: true,  
-        autoWidth: false, 
-        responsive: true, 
-        "pageLength": 10,
-        "lengthMenu": [10, 20, 30, 50, 100],
+    // Clears previous table data before adding new rows
+    function clearTableBody() {
+        const resultsBody = document.getElementById("tenantResultsBody");
+        if (resultsBody) {
+            resultsBody.innerHTML = ""; // Clear all existing rows
+        }
+    }
+
+    // Populates the payment table with tenant payment details
+    async function populateTable() {
+        ensureResultsContainer();
+        clearTableBody(); // Clear existing table content
+
+        const resultsBody = document.getElementById("tenantResultsBody");
+
+        try {
+            const response = await fetch("http://localhost:3000/get-tenants-payments"); // Fetch payments from server
+            if (!response.ok) throw new Error("Failed to fetch tenant payment data");
+
+            const tenants = await response.json();
+
+            if (tenants.length === 0) {
+                resultsBody.innerHTML = `<tr><td colspan="4" class="text-center text-muted">No payment records found.</td></tr>`;
+                return;
+            }
+
+            tenants.forEach(tenant => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${tenant.person_id}</td>
+                    <td>${tenant.name}</td>
+                    <td>${tenant.room_id}</td>
+                    <td>${tenant.rent_status}</td>
+                `;
+                resultsBody.appendChild(row);
+            });
+
+        } catch (error) {
+            console.error("Error fetching tenant payment data:", error);
+            resultsBody.innerHTML = `<tr><td colspan="4" class="text-center text-danger">Error loading payment data.</td></tr>`;
+        }
+    }
+
+    // Fetch payments from the server when the modal opens
+    document.getElementById("modalRentPayment").addEventListener("show.bs.modal", populateTable);
     });
+// End of Payment Function
+
+    /**     REPORTS SECTION          */
+    // Report For Tenant Summary Report
+    async function viewTenantReport(contracts) {
+        const tbody = document.getElementById('tenantReportTable').querySelector('tbody');
+        tbody.innerHTML = '';  // Clear existing table data
+
+        contracts.forEach(contract => {
+            const row = document.createElement('tr');
+            row.innerHTML = `
+                <td>${contract["Contract Status"]}</td>
+                <td>${contract["First Name"]}</td>
+                <td>${contract["Last Name"]}</td>
+                <td>${contract["Contact Number"]}</td>
+                <td>${contract["Date of Birth"]}</td>
+                <td>${contract["Sex"]}</td>
+                <td>${contract["Apartment Location"]}</td>
+                <td>₱${contract["Room Price"].toLocaleString()}</td>
+                <td>₱${contract["Utilities Total"].toLocaleString()}</td>
+                <td>₱${contract["Other Charges"].toLocaleString()}</td>
+                <td>₱${contract["Total Bill"].toLocaleString()}</td>
+                <td>₱${contract["Balance"].toLocaleString()}</td>
+                <td>${contract["Contract Date"]}</td>
+                <td>₱${contract["Payment Amount"].toLocaleString()}</td>
+                <td>${contract["Payment Date"]}</td>
+            `;
+            tbody.appendChild(row);
+        });
+
+        // **Destroy existing DataTable instance if it exists (important!)**
+        if ($.fn.DataTable.isDataTable('#tenantReportTable')) {
+            $('#tenantReportTable').DataTable().destroy();
+        }
+
+        // **Reinitialize DataTables**
+        $('#tenantReportTable').DataTable({
+            scrollX: true,  
+            autoWidth: false, 
+            responsive: true, 
+            "pageLength": 10,
+            "lengthMenu": [10, 20, 30, 50, 100],
+        });
 }
 
 // Report For Room Summary Report

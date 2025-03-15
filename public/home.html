@@ -614,6 +614,25 @@
                                     <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close" onclick="document.getElementById('formRentPayment').reset();"></button>
                                 </div>
                                 <div class="modal-body">
+                                    
+                                     <!-- Payment Table -->
+                                    <div class="table-responsive">
+                                        <table id="paymentTable" class="table table-dark table-striped table-hover">
+                                            <thead>
+                                                <tr>
+                                                    <th>Person ID</th>
+                                                    <th>Name</th>
+                                                    <th>Room ID</th>
+                                                    <th>Rent Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <!-- Payment data will be inserted here -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                    <!-- End of Payment Table -->
+
                                     <form id="formRentPayment" class="row g-3">
                                         
                                         <div class="col-12 text-center">
