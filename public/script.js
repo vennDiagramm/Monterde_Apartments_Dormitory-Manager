@@ -348,36 +348,61 @@ async function removeTenant(event) {
         const personId = document.getElementById('personId').value;
         
         if (!personId) {
-            alert("Please enter a valid Person ID!");
+            mySwalala.fire({
+                title: "Error!",
+                text: "Please enter a valid Person ID!",
+                icon: "error",
+                iconColor: "#8B0000",
+                confirmButtonColor: "#dc3545"
+            });
             return;
         }
-  
+
         // Confirm removal
-        const confirmRemoval = confirm("Are you sure you want to remove this tenant?");
-        if (!confirmRemoval) {
+        const confirmRemoval = await mySwalala.fire({
+            title: "Are you sure?",
+            text: "This action cannot be undone!",
+            icon: "warning",
+            iconColor: "#FFA500",
+            showCancelButton: true,
+            confirmButtonText: "Yes, remove",
+            cancelButtonText: "Cancel",
+            confirmButtonColor: "#8B0000",
+            cancelButtonColor: "#6c757d"
+        });
+
+        if (!confirmRemoval.isConfirmed) {
             return;
         }
-  
+
         // Send remove request to backend
         const response = await fetch(`/remove-tenant/${personId}`, {
             method: 'DELETE'
         });
-  
+
         if (!response.ok) {
             throw new Error('Failed to remove tenant');
         }
-  
-        alert('Tenant removed successfully!');
-        
-        // Close modal and reset form
-        closeModal('removeTenantModal');
-        event.target.reset();
-        
-        // Refresh rooms to update the display
-        fetchRooms();
+
+        mySwalala.fire({
+            title: "Success!",
+            text: "Tenant removed successfully!",
+            icon: "success",
+            iconColor: "#006400"
+        }).then(() => {
+            event.target.reset();
+            fetchRooms();
+        });
+
     } catch (error) {
         console.error("Error removing tenant:", error);
-        alert("Failed to remove tenant. " + error.message);
+        mySwalala.fire({
+            title: "Error!",
+            text: "Failed to remove tenant. " + error.message,
+            icon: "error",
+            iconColor: "#8B0000",
+            confirmButtonColor: "#dc3545"
+        });
     }
 }
 // End of Remove a Tenant Function
@@ -1553,14 +1578,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 const contractDetails_ID = await contractDetails_IDRes.json(); // Direct access, as the API returns the ID directly
                 const meterTotal = meterEnd - meterStart;
                 const utility = electricBill;
-                const balance = rentPrice;
-                const totalBill = balance;
+                const totalBill = await calculateMonthlyBill();
+
+                console.log("Total bill: ", totalBill);
 
 
                 const contractBillBody = {
                     Contract_Details_ID: contractDetails_ID,
                     total_bill: totalBill,
-                    Balance: rentPrice,
+                    Balance: totalBill,
                     Bill_meterEndMonth: meterEnd,
                     Bill_meterStartMonth: meterStart,
                     meter_total: meterTotal,
@@ -2080,6 +2106,8 @@ async function calculateMonthlyBill() {
         if (!roomsResponse.ok) {
             throw new Error('Failed to fetch active rooms');
         }
+
+        let totalRentFinal = 0;
         
         // Process each room
         for (const room of roomsData) {
@@ -2139,6 +2167,10 @@ async function calculateMonthlyBill() {
             icon: "success",
             iconColor: "#006400"
         });
+
+        console.log(`Total bill for room ${roomId}: ${totalRentFinal}`);
+        // DAPAT MAG E STORE NIYA ANG RESULTS KAY CONTRACT BILL
+        return totalRentFinal;  // Return the total rent final
         
     } catch (error) {
         console.error("Error in monthly billing calculation:", error);
@@ -2172,4 +2204,4 @@ function setupMonthlyBilling() {
 }
 
 // Initialize the monthly billing system when the page loads
-document.addEventListener('DOMContentLoaded', setupMonthlyBilling);
+//document.addEventListener('DOMContentLoaded', setupMonthlyBilling);
