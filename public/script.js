@@ -127,7 +127,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
     }
     editTenantBtn.addEventListener("click", async function () {
-        const response = await fetch(`http://localhost:3000/search-tenant/All`)
+        const response = await fetch(`/search-tenant/All`)
         const tenant = await response.json();
         viewEditTenantInfo(tenant);
     })
@@ -629,7 +629,7 @@ async function editTenant(event) {
             body: JSON.stringify(requestData)
         });
 
-        const responseE = await fetch(`http://localhost:3000/search-tenant/All`)
+        const responseE = await fetch(`/search-tenant/All`)
         const tenantE = await responseE.json();
         // const result = await response.json();
         
@@ -1100,7 +1100,7 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log("Sending apartment to server:", apartmentFirstWord);
         
         try {
-            const response = await fetch("http://localhost:3000/set-current-apartment", {
+            const response = await fetch("/set-current-apartment", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ apartment: apartmentFirstWord }),
@@ -1228,7 +1228,7 @@ document.addEventListener('DOMContentLoaded', function() {
           resultsBody.innerHTML = '<tr><td colspan="9" class="text-center">Loading...</td></tr>';
           
           // Send search request to backend
-          const response = await fetch(`http://localhost:3000/search-tenant/${userInput}`);
+          const response = await fetch(`/search-tenant/${userInput}`);
           
           if (response.status === 404) {
             resultsBody.innerHTML = '<tr><td colspan="9" class="text-center">No tenant found!</td></tr>';
@@ -1516,7 +1516,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 // Fetch Number of Tenants
                 try {
-                    const rentersResponse = await fetch(`http://localhost:3000/get-number-of-renters?roomId=${roomId}`);
+                    const rentersResponse = await fetch(`/get-number-of-renters?roomId=${roomId}`);
                     if (!rentersResponse.ok) throw new Error("Failed to fetch max renters");
 
                     const rentersData = await rentersResponse.json();
@@ -1530,7 +1530,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
 
                 // Fetch Electric Bill
-                const electricResponse = await fetch(`http://localhost:3000/calculate-electric-bill?prev_meter=${meterStart}&current_meter=${meterEnd}&num_renters=${numRenters}`);
+                const electricResponse = await fetch(`/calculate-electric-bill?prev_meter=${meterStart}&current_meter=${meterEnd}&num_renters=${numRenters}`);
                 if (!electricResponse.ok) throw new Error("Failed to fetch electric bill.");
 
                 const electricData = await electricResponse.json();
@@ -1630,7 +1630,7 @@ document.addEventListener('DOMContentLoaded', function () {
             changeAmount = payment - rentPrice;
 
             // Send payment data to the server
-            const response = await fetch("http://localhost:3000/process-payment", {
+            const response = await fetch("/process-payment", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -1714,7 +1714,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const resultsBody = document.getElementById("tenantResultsBody");
 
         try {
-            const response = await fetch("http://localhost:3000/get-tenants-payments"); // Fetch payments from server
+            const response = await fetch("/get-tenants-payments"); // Fetch payments from server
             if (!response.ok) throw new Error("Failed to fetch tenant payment data");
 
             const tenants = await response.json();
@@ -2034,7 +2034,7 @@ async function calculateMonthlyBill() {
             
             let numRenters = 0; 
             const waterBill = Number(document.getElementById("water_bill").value);
-            const rentersResponse = await fetch(`http://localhost:3000/get-number-of-renters?roomId=${roomId}`);
+            const rentersResponse = await fetch(`/get-number-of-renters?roomId=${roomId}`);
             const rentersData = await rentersResponse.json();
             numRenters = rentersData.numRenters;
             
